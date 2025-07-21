@@ -3,7 +3,7 @@ import pool from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   try {
-    const { key, name, tag } = await request.json();
+    const { key, name, tag }: { key: string | number; name: string; tag: string } = await request.json();
 
     if (!key || !name || !tag) {
       return NextResponse.json(
@@ -64,8 +64,8 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const name = searchParams.get('name');
-    const key = searchParams.get('key');
+    const name = searchParams.get('name') || '';
+    const key = searchParams.get('key') || '';
 
     if (!name && !key) {
       return NextResponse.json(

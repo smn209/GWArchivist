@@ -3,7 +3,7 @@ import pool from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   try {
-    const { pseudo, user_id } = await request.json();
+    const { pseudo, user_id }: { pseudo: string; user_id?: number } = await request.json();
 
     if (!pseudo) {
       return NextResponse.json(
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const pseudo = searchParams.get('pseudo');
+    const pseudo = searchParams.get('pseudo') || '';
 
     if (!pseudo) {
       return NextResponse.json(

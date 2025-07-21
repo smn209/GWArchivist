@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import CreateMatchRequest from '@/types/create-match-request';
+import Match from '@/types/match';
 
 function parseDurationToSeconds(duration: string): number {
   if (!duration) return 0;
@@ -14,7 +16,7 @@ function parseDurationToSeconds(duration: string): number {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body: CreateMatchRequest = await request.json();
     const {
       map_id,
       flux,
@@ -75,7 +77,7 @@ export async function POST(request: NextRequest) {
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`,
         [
           map_id ? String(map_id) : null,
-          parseDurationToSeconds(match_duration),
+          parseDurationToSeconds(match_duration || ''),
           winnerGuildId,
           matchDate,
           null,
@@ -190,7 +192,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const matchId = searchParams.get('id');
+    const matchId = searchParams.get('id') || '';
 
     if (!matchId) {
       return NextResponse.json(
@@ -217,7 +219,7 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      const match = matchResult.rows[0];
+      const match: Match = matchResult.rows[0];
 
       const guildStatesResult = await client.query(
         `SELECT gms.*, g.name as guild_name, g.tag as guild_tag 
