@@ -1,15 +1,15 @@
 version: '3.8'
 services:
-  db:
-    image: postgres:15
-    container_name: gwgvg_postgres
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: gwgvg_clickhouse
     restart: unless-stopped
     environment:
-      POSTGRES_USER: gwgvguser
-      POSTGRES_PASSWORD: gwgvgpass
-      POSTGRES_DB: gwgvgdb
+      - CLICKHOUSE_DB=gwarchivist
+      - CLICKHOUSE_USER=dev
+      - CLICKHOUSE_PASSWORD=dev
     ports:
-      - "5432:5432"
+      - "8123:8123"
+      - "9000:9000"
     volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
       - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
