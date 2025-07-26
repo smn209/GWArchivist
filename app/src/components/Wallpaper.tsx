@@ -1,9 +1,27 @@
-import React from "react";
+import { memo } from "react"
+import Image from "next/image"
+import { WallpaperProps } from '@/types'
 
-export function Wallpaper({ children, src = "/wallpapers/meditation.png" }: { children: React.ReactNode; src?: string }) {
+const containerClass = "fixed inset-0 -z-10 w-full h-full"
+const contentClass = "relative w-full h-full"
+
+export const Wallpaper = memo(function Wallpaper({ 
+  children, 
+  src = "/wallpapers/meditation.png" 
+}: WallpaperProps) {
   return (
-    <div className="fixed inset-0 -z-10 w-full h-full bg-cover bg-center" style={{ backgroundImage: `url(${src})` }}>
-      <div className="relative w-full h-full">{children}</div>
+    <div className={containerClass}>
+      <Image  
+        src={src}
+        alt="Background wallpaper"
+        fill
+        className="object-cover"
+        priority
+        sizes="100vw"
+        quality={75}
+        loading="eager"
+      />
+      <div className={contentClass}>{children}</div>
     </div>
-  );
-} 
+  )
+}) 
