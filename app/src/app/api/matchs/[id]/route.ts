@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import client from '@/lib/clickhouse';
+import { QueryResult } from '@/types';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const matchId = params.id;
+    const { id: matchId } = await params;
 
     // get match info
     const matchResult = await client.query({
@@ -17,7 +18,7 @@ export async function GET(
       query_params: { match_id: matchId }
     });
 
-    const matchRows = await matchResult.json();
+    const matchRows = await matchResult.json() as QueryResult<Record<string, unknown>>;
     if (matchRows.data.length === 0) {
       return NextResponse.json(
         { error: 'match not found' },
@@ -25,7 +26,7 @@ export async function GET(
       );
     }
 
-    const match: any = matchRows.data[0];
+    const match = matchRows.data[0] as Record<string, unknown>;
 
     // get players
     const playersResult = await client.query({
@@ -43,7 +44,7 @@ export async function GET(
       query_params: { match_id: matchId }
     });
 
-    const players = await playersResult.json();
+    const players = await playersResult.json() as QueryResult<Record<string, unknown>>;
 
     // get npcs
     const npcsResult = await client.query({
@@ -55,7 +56,7 @@ export async function GET(
       query_params: { match_id: matchId }
     });
 
-    const npcs = await npcsResult.json();
+    const npcs = await npcsResult.json() as QueryResult<Record<string, unknown>>;
 
     // get guilds info
     const guild1Result = await client.query({
@@ -68,8 +69,8 @@ export async function GET(
       query_params: { id: match.guild2_id }
     });
 
-    const guild1Data = await guild1Result.json();
-    const guild2Data = await guild2Result.json();
+    const guild1Data = await guild1Result.json() as QueryResult<Record<string, unknown>>;
+    const guild2Data = await guild2Result.json() as QueryResult<Record<string, unknown>>;
 
     // structure response similar to original format
     const response = {
@@ -88,7 +89,7 @@ export async function GET(
         winner_guild_id: match.winner_guild_id
       },
       guilds: {
-        [match.guild1_id]: {
+        [match.guild1_id as string]: {
           id: match.guild1_id,
           name: match.guild1_name,
           tag: match.guild1_tag,
@@ -99,7 +100,7 @@ export async function GET(
           qualifier_points: match.guild1_qualifier_points,
           full_data: guild1Data.data[0] || null
         },
-        [match.guild2_id]: {
+        [match.guild2_id as string]: {
           id: match.guild2_id,
           name: match.guild2_name,
           tag: match.guild2_tag,
@@ -112,20 +113,20 @@ export async function GET(
         }
       },
       parties: {
-        1: {
-          PLAYER: players.data.filter((p: any) => p.team_id === 1),
-          OTHER: npcs.data.filter((n: any) => n.team_id === 1)
+        "1": {
+          PLAYER: players.data.filter((p) => (p as Record<string, unknown>).team_id === 1),
+          OTHER: npcs.data.filter((n) => (n as Record<string, unknown>).team_id === 1)
         },
-        2: {
-          PLAYER: players.data.filter((p: any) => p.team_id === 2),
-          OTHER: npcs.data.filter((n: any) => n.team_id === 2)
+        "2": {
+          PLAYER: players.data.filter((p) => (p as Record<string, unknown>).team_id === 2),
+          OTHER: npcs.data.filter((n) => (n as Record<string, unknown>).team_id === 2)
         }
       },
       stats: {
         total_players: players.data.length,
         total_npcs: npcs.data.length,
-        team1_players: players.data.filter((p: any) => p.team_id === 1).length,
-        team2_players: players.data.filter((p: any) => p.team_id === 2).length
+        team1_players: players.data.filter((p) => (p as Record<string, unknown>).team_id === 1).length,
+        team2_players: players.data.filter((p) => (p as Record<string, unknown>).team_id === 2).length
       }
     };
 

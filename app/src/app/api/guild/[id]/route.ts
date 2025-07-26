@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import client from '@/lib/clickhouse';
+import { QueryResult } from '@/types';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -27,14 +28,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       query_params: { id } 
     });
     
-    const rows = await result.json();
+    const rows = await result.json() as QueryResult<Record<string, unknown>>;
     
     if (rows.data.length === 0) {
       return NextResponse.json({ error: 'Guild not found' }, { status: 404 });
     }
     
     return NextResponse.json(rows.data[0]);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to fetch guild' }, { status: 500 });
   }
 }

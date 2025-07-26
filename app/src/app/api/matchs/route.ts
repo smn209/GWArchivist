@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import client from '@/lib/clickhouse';
-import { MatchData } from '@/app/types/match-data';
+import { MatchData, QueryResult, PseudoRow, GuildRow } from '@/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
         query_params: { pseudo }
       });
       
-      const rows = await existingPseudo.json() as { data: any[] };
+      const rows = await existingPseudo.json() as QueryResult<PseudoRow>;
       if (rows.data.length > 0) {
         pseudoIds.set(pseudo, rows.data[0].id);
       } else {
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
         query_params: { name: guildData.name }
       });
       
-      const rows = await existingGuild.json();
+      const rows = await existingGuild.json() as QueryResult<GuildRow>;
       if (rows.data.length === 0) {
         const newGuildId = Math.floor(Math.random() * 1000000) + Date.now();
         await client.insert({
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
     });
 
     // insert players
-    const players: Array<any> = [];
+    const players: Record<string, unknown>[] = [];
     Object.values(data.parties).forEach(party => {
       party.PLAYER.forEach(player => {
         const dbGuildId = guildDbIds.get(player.guild_id)!;
@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
     }
 
     // insert npcs
-    const npcs: Array<any> = [];
+    const npcs: Record<string, unknown>[] = [];
     Object.values(data.parties).forEach(party => {
       party.OTHER.forEach(other => {
         npcs.push({
@@ -207,8 +207,139 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '50', 10);
     const matchId = searchParams.get('match_id');
+    const matchIds = searchParams.get('match_ids');
     
-    if (matchId) {
+    if (matchIds) {
+      // multiple matches detailed view
+      const idsArray = matchIds.split(',').map(id => id.trim()).filter(id => id);
+      
+      if (idsArray.length === 0) {
+        return NextResponse.json({ error: 'no valid match IDs provided' }, { status: 400 });
+      }
+
+      const placeholders = idsArray.map((_, index) => `{match_id_${index}:String}`).join(',');
+      const queryParams = idsArray.reduce((acc, id, index) => {
+        acc[`match_id_${index}`] = id;
+        return acc;
+      }, {} as Record<string, string>);
+
+      const query = `
+        SELECT 
+          m.*
+        FROM gvg_matches m
+        WHERE m.match_id IN (${placeholders})
+        ORDER BY m.match_date DESC, m.match_id DESC
+      `;
+      
+      const matchResult = await client.query({
+        query,
+        query_params: queryParams
+      });
+      
+      const matchesData = (await matchResult.json() as QueryResult<Record<string, unknown>>).data;
+      
+      if (matchesData.length === 0) {
+        return NextResponse.json([]);
+      }
+
+      // get players for all matches
+      const playersQuery = `
+        SELECT 
+          mp.match_id, mp.agent_id, mp.pseudo_name, mp.guild_id, mp.team_id, mp.party_id,
+          mp.player_number, mp.model_id, mp.primary_profession, mp.secondary_profession,
+          mp.level, mp.skill_template_code, mp.used_skills,
+          COALESCE(u.username, '') as username
+        FROM match_players mp
+        LEFT JOIN pseudos p ON mp.pseudo_id = p.id
+        LEFT JOIN users u ON p.user_id = u.id
+        WHERE mp.match_id IN (${placeholders})
+        ORDER BY mp.match_id, mp.team_id, mp.player_number
+      `;
+      
+      const npcsQuery = `
+        SELECT * FROM match_npcs 
+        WHERE match_id IN (${placeholders})
+        ORDER BY match_id, team_id, agent_id
+      `;
+      
+      const [playersResult, npcsResult] = await Promise.all([
+        client.query({ query: playersQuery, query_params: queryParams }),
+        client.query({ query: npcsQuery, query_params: queryParams })
+      ]);
+      
+      const allPlayers = (await playersResult.json() as QueryResult<Record<string, unknown>>).data;
+      const allNpcs = (await npcsResult.json() as QueryResult<Record<string, unknown>>).data;
+      
+      // organize response by match_id
+      const response = matchesData.map(matchData => ({
+        match_info: {
+          match_id: matchData.match_id,
+          map_id: matchData.map_id,
+          map_name: matchData.map_name,
+          flux: matchData.flux,
+          occasion: matchData.occasion,
+          match_date: matchData.match_date,
+          duration: matchData.duration_formatted,
+          original_duration: matchData.match_original_duration,
+          end_time_ms: matchData.match_end_time_ms,
+          end_time_formatted: matchData.match_end_time_formatted,
+          winner_party_id: matchData.winner_party_id,
+          winner_guild_id: matchData.winner_guild_id
+        },
+        guilds: {
+          [matchData.guild1_id as string]: {
+            id: matchData.guild1_id,
+            name: matchData.guild1_name,
+            tag: matchData.guild1_tag,
+            rank: matchData.guild1_rank,
+            rating: matchData.guild1_rating,
+            faction: matchData.guild1_faction,
+            faction_points: matchData.guild1_faction_points,
+            qualifier_points: matchData.guild1_qualifier_points
+          },
+          [matchData.guild2_id as string]: {
+            id: matchData.guild2_id,
+            name: matchData.guild2_name,
+            tag: matchData.guild2_tag,
+            rank: matchData.guild2_rank,
+            rating: matchData.guild2_rating,
+            faction: matchData.guild2_faction,
+            faction_points: matchData.guild2_faction_points,
+            qualifier_points: matchData.guild2_qualifier_points
+          }
+        },
+        parties: {
+          "1": {
+            PLAYER: allPlayers.filter(p => p.match_id === matchData.match_id && p.team_id === 1).map(p => ({
+              agent_id: p.agent_id,
+              id: p.agent_id,
+              encoded_name: p.pseudo_name,
+              guild_id: p.guild_id,
+              player_number: p.player_number,
+              primary_profession: p.primary_profession,
+              secondary_profession: p.secondary_profession,
+              used_skills: p.used_skills
+            })),
+            OTHER: allNpcs.filter(n => n.match_id === matchData.match_id && n.team_id === 1)
+          },
+          "2": {
+            PLAYER: allPlayers.filter(p => p.match_id === matchData.match_id && p.team_id === 2).map(p => ({
+              agent_id: p.agent_id,
+              id: p.agent_id,
+              encoded_name: p.pseudo_name,
+              guild_id: p.guild_id,
+              player_number: p.player_number,
+              primary_profession: p.primary_profession,
+              secondary_profession: p.secondary_profession,
+              used_skills: p.used_skills
+            })),
+            OTHER: allNpcs.filter(n => n.match_id === matchData.match_id && n.team_id === 2)
+          }
+        }
+      }));
+      
+      return NextResponse.json(response);
+    } else if (matchId) {
       // single match detailed view
       const query = `
         SELECT 
@@ -234,7 +365,7 @@ export async function GET(request: NextRequest) {
         query_params: { match_id: matchId }
       });
       
-      const matchData = (await matchResult.json()).data[0];
+      const matchData = (await matchResult.json() as QueryResult<Record<string, unknown>>).data[0];
       if (!matchData) {
         return NextResponse.json({ error: 'match not found' }, { status: 404 });
       }
@@ -264,8 +395,8 @@ export async function GET(request: NextRequest) {
         client.query({ query: npcsQuery, query_params: { match_id: matchId } })
       ]);
       
-      const players = (await playersResult.json()).data;
-      const npcs = (await npcsResult.json()).data;
+      const players = (await playersResult.json() as QueryResult<Record<string, unknown>>).data;
+      const npcs = (await npcsResult.json() as QueryResult<Record<string, unknown>>).data;
       
       // organize response
       const response = {
@@ -284,7 +415,7 @@ export async function GET(request: NextRequest) {
           winner_guild_id: matchData.winner_guild_id
         },
         guilds: {
-          [matchData.guild1_id]: {
+          [matchData.guild1_id as string]: {
             id: matchData.guild1_id,
             name: matchData.guild1_name,
             tag: matchData.guild1_tag,
@@ -294,7 +425,7 @@ export async function GET(request: NextRequest) {
             faction_points: matchData.guild1_faction_points,
             qualifier_points: matchData.guild1_qualifier_points
           },
-          [matchData.guild2_id]: {
+          [matchData.guild2_id as string]: {
             id: matchData.guild2_id,
             name: matchData.guild2_name,
             tag: matchData.guild2_tag,
@@ -376,10 +507,10 @@ export async function GET(request: NextRequest) {
         query_params: { limit }
       });
       
-      const matches = (await result.json()).data;
+      const matches = (await result.json() as QueryResult<Record<string, unknown>>).data;
       return NextResponse.json(matches);
     }
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'failed to fetch matches' }, { status: 500 });
   }
 }
