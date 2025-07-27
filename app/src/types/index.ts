@@ -201,3 +201,87 @@ export interface CreateMatchRequest {
   guilds: Record<string, { id: number; name: string; tag: string; rank: number; rating: number; faction: string; faction_points: number; qualifier_points: number }>;
 }
 
+export interface MemorialFilters {
+  search?: string
+  dateFrom?: string
+  dateTo?: string
+  mapId?: number
+  flux?: string
+  occasion?: string
+  profession1?: number
+  profession1Count?: number
+  profession2?: number
+  profession2Count?: number
+  profession3?: number
+  profession3Count?: number
+  profession4?: number
+  profession4Count?: number
+  profession5?: number
+  profession5Count?: number
+  profession6?: number
+  profession6Count?: number
+  profession7?: number
+  profession7Count?: number
+  profession8?: number
+  profession8Count?: number
+  profession9?: number
+  profession9Count?: number
+  profession10?: number
+  profession10Count?: number
+  guildId?: number
+  limit?: number
+  offset?: number
+}
+
+export interface MemorialMatch {
+  match_id: string
+  match_date: string
+  map_id: number
+  map_name: string
+  flux: string
+  occasion: string
+  duration_formatted: string
+  guild1_id: number
+  guild1_name: string
+  guild1_tag: string
+  guild1_rank: number
+  guild1_professions: number[]
+  guild2_id: number
+  guild2_name: string
+  guild2_tag: string
+  guild2_rank: number
+  guild2_professions: number[]
+  winner_guild_id: number
+  total_players: number
+}
+
+export interface MemorialResponse {
+  matches: MemorialMatch[]
+  pagination: {
+    total: number
+    limit: number
+    offset: number
+    hasMore: boolean
+  }
+}
+
+export interface FilterOptions {
+  occasions: string[]
+  fluxes: string[]
+  maps: { map_id: number; map_name: string }[]
+  guilds: { id: number; name: string; tag: string }[]
+}
+
+export const PROFESSIONS = [
+  { id: 1, name: "Warrior" },
+  { id: 2, name: "Ranger" },
+  { id: 3, name: "Monk" },
+  { id: 4, name: "Necromancer" },
+  { id: 5, name: "Mesmer" },
+  { id: 6, name: "Elementalist" },
+  { id: 7, name: "Assassin" },
+  { id: 8, name: "Ritualist" },
+  { id: 9, name: "Paragon" },
+  { id: 10, name: "Dervish" },
+]
+
