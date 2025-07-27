@@ -14,8 +14,8 @@ html, body {
   font-family: 'Fontin-SmallCaps', sans-serif;
   margin: 0;
   padding: 0;
-  background: #fff !important;
-  color: #111 !important;
+  background: transparent;
+  color: #111;
 }
 
 @theme inline {
@@ -130,7 +130,7 @@ html, body {
     @apply border-border outline-ring/50;
   }
   body {
-    background: #fff !important;
-    color: #111 !important;
+    background: transparent;
+    color: #111;
   }
 }

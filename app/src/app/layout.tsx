@@ -3,11 +3,11 @@ import "./globals.css";
 import { Header } from "../components/Header"
 
 export const metadata: Metadata = {
-  title: "GW",
-  description: "GW",
+  title: "GW Archivist",
+  description: "GW Archivist - Guild Vs Guild matches history.",
   icons: {
-    icon: '/skills/349.jpg',
-    apple: '/skills/349.jpg',
+    icon: '/icons/The_Frog.png',
+    apple: '/icons/The_Frog.png',
   },
 };
 
