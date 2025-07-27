@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Search, Calendar, Trophy, Filter, Plus, Minus, Crown } from "lucide-react"
+import { Search, Calendar, Trophy, Filter, Crown } from "lucide-react"
 import Image from "next/image"
 import { Wallpaper } from "../components/Wallpaper"
 import { ProfessionImage } from "../components/ProfessionImage"
@@ -113,14 +113,37 @@ export default function MemorialView() {
 
   const setProfessionCount = (professionId: number, count: number) => {
     const newFilters = { ...filters }
-    const key = `profession${professionId}Count`
-    newFilters[key] = count
+    
+    switch (professionId) {
+      case 1: newFilters.profession1Count = count; break;
+      case 2: newFilters.profession2Count = count; break;
+      case 3: newFilters.profession3Count = count; break;
+      case 4: newFilters.profession4Count = count; break;
+      case 5: newFilters.profession5Count = count; break;
+      case 6: newFilters.profession6Count = count; break;
+      case 7: newFilters.profession7Count = count; break;
+      case 8: newFilters.profession8Count = count; break;
+      case 9: newFilters.profession9Count = count; break;
+      case 10: newFilters.profession10Count = count; break;
+    }
+    
     setFilters(newFilters)
   }
 
-  const getProfessionCount = (professionId: number) => {
-    const key = `profession${professionId}Count`
-    return filters[key] || 0
+  const getProfessionCount = (professionId: number): number => {
+    switch (professionId) {
+      case 1: return filters.profession1Count || 0;
+      case 2: return filters.profession2Count || 0;
+      case 3: return filters.profession3Count || 0;
+      case 4: return filters.profession4Count || 0;
+      case 5: return filters.profession5Count || 0;
+      case 6: return filters.profession6Count || 0;
+      case 7: return filters.profession7Count || 0;
+      case 8: return filters.profession8Count || 0;
+      case 9: return filters.profession9Count || 0;
+      case 10: return filters.profession10Count || 0;
+      default: return 0;
+    }
   }
 
   const renderProfessionFilter = (profession: typeof PROFESSIONS[0]) => {
