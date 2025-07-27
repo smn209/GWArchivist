@@ -1,0 +1,23 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "iterations": 100,
+  "concurrentRequests": 5,
+  "timeout": 30000,
+  "testData": {
+    "sampleMatchIds": [
+      "1753467757387916",
+      "1753467757378750", 
+      "1753467757376875",
+      "1753467757369458",
+      "1753467755573166"
+    ],
+    "sampleGuilds": ["Missed Grasping By A Country", "Rebel Rising", "One Time Too Many"],
+    "sampleDates": {
+      "recent": ["2024-01-01", "2024-12-31"],
+      "old": ["2020-01-01", "2021-12-31"]
+    },
+    "sampleFlux": ["Chain Combo", "Chain Combo"],
+    "sampleOccasions": ["Finals", "Swiss Rounds"],
+    "sampleMaps": [1, 2, 3]
+  }
+}
