@@ -30,14 +30,9 @@ const parseFilters = (searchParams: URLSearchParams): MemorialFilters => {
 
   // profession filters
   for (let i = 1; i <= 10; i++) {
-    const prof = searchParams.get(`profession${i}`)
     const count = searchParams.get(`profession${i}Count`)
     
-    if (prof) {
-      const key = `profession${i}` as keyof MemorialFilters
-      filters[key] = parseInt(prof) as never
-    }
-    if (count) {
+    if (count && parseInt(count) > 0) {
       const key = `profession${i}Count` as keyof MemorialFilters
       filters[key] = parseInt(count) as never
     }
@@ -100,10 +95,10 @@ const buildWhereConditions = (filters: MemorialFilters): { conditions: string[],
 
   // profession filtering using subqueries
   for (let i = 1; i <= 10; i++) {
-    const professionKey = `profession${i}` as keyof MemorialFilters
     const countKey = `profession${i}Count` as keyof MemorialFilters
     
-    if (filters[professionKey] && filters[countKey]) {
+    if (filters[countKey] && filters[countKey] > 0) {
+      console.log(`Adding profession filter for profession ${i} with count ${filters[countKey]}`)
       conditions.push(`
         m.match_id IN (
           SELECT mp.match_id 
@@ -113,7 +108,7 @@ const buildWhereConditions = (filters: MemorialFilters): { conditions: string[],
           HAVING count() >= {profession${i}Count:UInt8}
         )
       `)
-      params[`profession${i}`] = filters[professionKey]
+      params[`profession${i}`] = i
       params[`profession${i}Count`] = filters[countKey]
     }
   }
