@@ -25,7 +25,9 @@ const parseFilters = (searchParams: URLSearchParams): MemorialFilters => {
   const mapId = searchParams.get('mapId')
   const guildId = searchParams.get('guildId')
   
-  if (mapId) filters.mapId = parseInt(mapId)
+  if (mapId) {
+    filters.mapId = mapId as any
+  }
   if (guildId) filters.guildId = parseInt(guildId)
 
   // profession filters
@@ -56,8 +58,18 @@ const buildWhereConditions = (filters: MemorialFilters): { conditions: string[],
   }
 
   if (filters.mapId) {
-    conditions.push('m.map_id = {mapId:UInt32}')
-    params.mapId = filters.mapId
+    const mapValue = filters.mapId as string
+    if (mapValue.startsWith('map_')) {
+      const mapName = mapValue.substring(4) // Remove 'map_' prefix
+      conditions.push('m.map_name = {mapName:String}')
+      params.mapName = mapName
+    } else if (!isNaN(Number(mapValue))) {
+      conditions.push('m.map_id = {mapId:UInt32}')
+      params.mapId = parseInt(mapValue)
+    } else {
+      conditions.push('m.map_name = {mapName:String}')
+      params.mapName = mapValue
+    }
   }
 
   if (filters.flux) {

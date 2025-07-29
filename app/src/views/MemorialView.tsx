@@ -40,7 +40,7 @@ export default function MemorialView() {
     if (urlParams.get('search')) initialFilters.search = urlParams.get('search')!
     if (urlParams.get('dateFrom')) initialFilters.dateFrom = urlParams.get('dateFrom')!
     if (urlParams.get('dateTo')) initialFilters.dateTo = urlParams.get('dateTo')!
-    if (urlParams.get('mapId')) initialFilters.mapId = parseInt(urlParams.get('mapId')!)
+    if (urlParams.get('mapId')) initialFilters.mapId = urlParams.get('mapId')! as any
     if (urlParams.get('flux')) initialFilters.flux = urlParams.get('flux')!
     if (urlParams.get('occasion')) initialFilters.occasion = urlParams.get('occasion')!
     if (urlParams.get('limit')) initialFilters.limit = parseInt(urlParams.get('limit')!) || 50
@@ -391,14 +391,17 @@ export default function MemorialView() {
                   </label>
                   <Select
                     value={filters.mapId?.toString() || ''}
-                    onChange={(e) => handleFilterChange('mapId', e.target.value ? parseInt(e.target.value) : undefined)}
+                    onChange={(e) => handleFilterChange('mapId', e.target.value || undefined)}
                   >
                     <SelectOption value="">All Maps</SelectOption>
-                    {filterOptions.maps.map(map => (
-                      <SelectOption key={map.map_id} value={map.map_id.toString()}>
-                        {map.map_name}
-                      </SelectOption>
-                    ))}
+                    {filterOptions.maps.map(map => {
+                      const value = map.map_id && map.map_id !== null ? map.map_id.toString() : `map_${map.map_name}`
+                      return (
+                        <SelectOption key={`${map.map_id || 'null'}_${map.map_name}`} value={value}>
+                          {map.map_name}
+                        </SelectOption>
+                      )
+                    })}
                   </Select>
                 </div>
                 <div>
