@@ -62,23 +62,31 @@ export default function MemorialView() {
   const loadFilterOptions = async () => {
     try {
       const requests = ['occasions', 'fluxes', 'maps', 'guilds'].map(type =>
-        fetch('/api/memorial', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type })
-        }).then(res => res.json())
+        fetch(`/api/memorial?type=${type}`)
+          .then(res => {
+            if (!res.ok) {
+              throw new Error(`Failed to fetch ${type}: ${res.status}`)
+            }
+            return res.json()
+          })
+          .catch(error => {
+            console.error(`Error fetching ${type}:`, error)
+            return []
+          })
       )
 
       const [occasions, fluxes, maps, guilds] = await Promise.all(requests)
       
-      const uniqueOccasions = [...new Set(occasions)]
-      const uniqueFluxes = [...new Set(fluxes)]
-      const uniqueMaps = maps.filter((map: { map_id: number }, index: number, self: { map_id: number }[]) => 
+      console.log('API responses:', { occasions, fluxes, maps, guilds }) // Debug log
+      
+      const uniqueOccasions = [...new Set(occasions || [])]
+      const uniqueFluxes = [...new Set(fluxes || [])]
+      const uniqueMaps = Array.isArray(maps) ? maps.filter((map: { map_id: number }, index: number, self: { map_id: number }[]) => 
         index === self.findIndex((m: { map_id: number }) => m.map_id === map.map_id)
-      )
-      const uniqueGuilds = guilds.filter((guild: { id: number }, index: number, self: { id: number }[]) => 
+      ) : []
+      const uniqueGuilds = Array.isArray(guilds) ? guilds.filter((guild: { id: number }, index: number, self: { id: number }[]) => 
         index === self.findIndex((g: { id: number }) => g.id === guild.id)
-      )
+      ) : []
       
       setFilterOptions({ 
         occasions: uniqueOccasions, 
