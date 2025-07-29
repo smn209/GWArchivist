@@ -1,31 +1,13 @@
 "use client"
 import { PlayerDetails } from '../components/PlayerDetails'
-import { Player } from '@/types'
+import { Player, MatchViewProps } from '@/types'
 import Image from "next/image"
 import Link from "next/link"
 import { Input } from "../components/ui/input"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
-interface MatchViewProps {
-  id: string;
-  data: {
-    match_info: {
-      match_id: string;
-      winner_guild_id?: number;
-    };
-    guilds: Record<string, {
-      id: number;
-      name: string;
-      tag: string;
-    }>;
-    parties: Record<string, {
-      PLAYER: Player[];
-    }>;
-  };
-}
-
-export function MatchView({ id, data }: MatchViewProps) {
+export function MatchView({ data }: MatchViewProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
   

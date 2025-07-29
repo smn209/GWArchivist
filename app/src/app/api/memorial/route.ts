@@ -26,7 +26,7 @@ const parseFilters = (searchParams: URLSearchParams): MemorialFilters => {
   const guildId = searchParams.get('guildId')
   
   if (mapId) {
-    filters.mapId = mapId as any
+    filters.mapId = mapId
   }
   if (guildId) filters.guildId = parseInt(guildId)
 
@@ -58,7 +58,7 @@ const buildWhereConditions = (filters: MemorialFilters): { conditions: string[],
   }
 
   if (filters.mapId) {
-    const mapValue = filters.mapId as string
+    const mapValue = String(filters.mapId)
     if (mapValue.startsWith('map_')) {
       const mapName = mapValue.substring(4) // Remove 'map_' prefix
       conditions.push('m.map_name = {mapName:String}')
@@ -108,9 +108,10 @@ const buildWhereConditions = (filters: MemorialFilters): { conditions: string[],
   // profession filtering using subqueries
   for (let i = 1; i <= 10; i++) {
     const countKey = `profession${i}Count` as keyof MemorialFilters
+    const countValue = filters[countKey] as number | undefined
     
-    if (filters[countKey] && filters[countKey] > 0) {
-      console.log(`Adding profession filter for profession ${i} with count ${filters[countKey]}`)
+    if (countValue && typeof countValue === 'number' && countValue > 0) {
+      console.log(`Adding profession filter for profession ${i} with count ${countValue}`)
       conditions.push(`
         m.match_id IN (
           SELECT mp.match_id 
@@ -121,7 +122,7 @@ const buildWhereConditions = (filters: MemorialFilters): { conditions: string[],
         )
       `)
       params[`profession${i}`] = i
-      params[`profession${i}Count`] = filters[countKey]
+      params[`profession${i}Count`] = countValue
     }
   }
 

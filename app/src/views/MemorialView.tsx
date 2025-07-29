@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Calendar, Trophy, Filter } from "lucide-react"
 import Image from "next/image"
@@ -33,73 +33,7 @@ export default function MemorialView() {
   const [filters, setFilters] = useState<MemorialFilters>(createEmptyFilters())
   const router = useRouter()
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const initialFilters = createEmptyFilters()
-    
-    if (urlParams.get('search')) initialFilters.search = urlParams.get('search')!
-    if (urlParams.get('dateFrom')) initialFilters.dateFrom = urlParams.get('dateFrom')!
-    if (urlParams.get('dateTo')) initialFilters.dateTo = urlParams.get('dateTo')!
-    if (urlParams.get('mapId')) initialFilters.mapId = urlParams.get('mapId')! as any
-    if (urlParams.get('flux')) initialFilters.flux = urlParams.get('flux')!
-    if (urlParams.get('occasion')) initialFilters.occasion = urlParams.get('occasion')!
-    if (urlParams.get('limit')) initialFilters.limit = parseInt(urlParams.get('limit')!) || 50
-    if (urlParams.get('offset')) initialFilters.offset = parseInt(urlParams.get('offset')!) || 0
-    
-    for (let i = 1; i <= 10; i++) {
-      const profCount = urlParams.get(`profession${i}Count`)
-      if (profCount) {
-        const key = `profession${i}Count` as keyof MemorialFilters
-        ;(initialFilters as Record<string, unknown>)[key] = parseInt(profCount)
-      }
-    }
-    
-    setFilters(initialFilters)
-    searchMatches(initialFilters, true)
-    loadFilterOptions()
-  }, [])
-
-  const loadFilterOptions = async () => {
-    try {
-      const requests = ['occasions', 'fluxes', 'maps', 'guilds'].map(type =>
-        fetch(`/api/memorial?type=${type}`)
-          .then(res => {
-            if (!res.ok) {
-              throw new Error(`Failed to fetch ${type}: ${res.status}`)
-            }
-            return res.json()
-          })
-          .catch(error => {
-            console.error(`Error fetching ${type}:`, error)
-            return []
-          })
-      )
-
-      const [occasions, fluxes, maps, guilds] = await Promise.all(requests)
-      
-      console.log('API responses:', { occasions, fluxes, maps, guilds }) // Debug log
-      
-      const uniqueOccasions = [...new Set(occasions || [])]
-      const uniqueFluxes = [...new Set(fluxes || [])]
-      const uniqueMaps = Array.isArray(maps) ? maps.filter((map: { map_id: number }, index: number, self: { map_id: number }[]) => 
-        index === self.findIndex((m: { map_id: number }) => m.map_id === map.map_id)
-      ) : []
-      const uniqueGuilds = Array.isArray(guilds) ? guilds.filter((guild: { id: number }, index: number, self: { id: number }[]) => 
-        index === self.findIndex((g: { id: number }) => g.id === guild.id)
-      ) : []
-      
-      setFilterOptions({ 
-        occasions: uniqueOccasions, 
-        fluxes: uniqueFluxes, 
-        maps: uniqueMaps, 
-        guilds: uniqueGuilds 
-      })
-    } catch (error) {
-      console.error('failed to load filter options:', error)
-    }
-  }
-
-  const searchMatches = async (newFilters: MemorialFilters = filters, resetOffset = true) => {
+  const searchMatches = useCallback(async (newFilters: MemorialFilters, resetOffset = true) => {
     setLoading(true)
     try {
       const searchParams = new URLSearchParams()
@@ -130,7 +64,73 @@ export default function MemorialView() {
     } finally {
       setLoading(false)
     }
+  }, [])
+
+  const loadFilterOptions = async () => {
+    try {
+      const requests = ['occasions', 'fluxes', 'maps', 'guilds'].map(type =>
+        fetch(`/api/memorial?type=${type}`)
+          .then(res => {
+            if (!res.ok) {
+              throw new Error(`Failed to fetch ${type}: ${res.status}`)
+            }
+            return res.json()
+          })
+          .catch(error => {
+            console.error(`Error fetching ${type}:`, error)
+            return []
+          })
+      )
+
+      const [occasions, fluxes, maps, guilds] = await Promise.all(requests)
+      
+      console.log('API responses:', { occasions, fluxes, maps, guilds }) // Debug log
+      
+      const uniqueOccasions = [...new Set(occasions || [])] as string[]
+      const uniqueFluxes = [...new Set(fluxes || [])] as string[]
+      const uniqueMaps = Array.isArray(maps) ? maps.filter((map: { map_id: number }, index: number, self: { map_id: number }[]) => 
+        index === self.findIndex((m: { map_id: number }) => m.map_id === map.map_id)
+      ) : []
+      const uniqueGuilds = Array.isArray(guilds) ? guilds.filter((guild: { id: number }, index: number, self: { id: number }[]) => 
+        index === self.findIndex((g: { id: number }) => g.id === guild.id)
+      ) : []
+      
+      setFilterOptions({ 
+        occasions: uniqueOccasions, 
+        fluxes: uniqueFluxes, 
+        maps: uniqueMaps, 
+        guilds: uniqueGuilds 
+      })
+    } catch (error) {
+      console.error('failed to load filter options:', error)
+    }
   }
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const initialFilters = createEmptyFilters()
+    
+    if (urlParams.get('search')) initialFilters.search = urlParams.get('search')!
+    if (urlParams.get('dateFrom')) initialFilters.dateFrom = urlParams.get('dateFrom')!
+    if (urlParams.get('dateTo')) initialFilters.dateTo = urlParams.get('dateTo')!
+    if (urlParams.get('mapId')) initialFilters.mapId = urlParams.get('mapId')!
+    if (urlParams.get('flux')) initialFilters.flux = urlParams.get('flux')!
+    if (urlParams.get('occasion')) initialFilters.occasion = urlParams.get('occasion')!
+    if (urlParams.get('limit')) initialFilters.limit = parseInt(urlParams.get('limit')!) || 50
+    if (urlParams.get('offset')) initialFilters.offset = parseInt(urlParams.get('offset')!) || 0
+    
+    for (let i = 1; i <= 10; i++) {
+      const profCount = urlParams.get(`profession${i}Count`)
+      if (profCount) {
+        const key = `profession${i}Count` as keyof MemorialFilters
+        ;(initialFilters as Record<string, unknown>)[key] = parseInt(profCount)
+      }
+    }
+    
+    setFilters(initialFilters)
+    searchMatches(initialFilters, true)
+    loadFilterOptions()
+  }, [searchMatches])
 
   const handleFilterChange = (key: keyof MemorialFilters, value: unknown) => {
     setFilters(prev => ({ ...prev, [key]: value }))
