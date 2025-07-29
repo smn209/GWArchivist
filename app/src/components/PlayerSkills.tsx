@@ -3,7 +3,7 @@ import { memo } from 'react'
 import { SkillImage } from './SkillImage'
 import { PlayerSkillsProps } from '@/types'
 
-const containerStyle = { display: 'flex', gap: 2 }
+const containerStyle = { display: 'flex', gap: 1, height: 40 }
 const emptySkillStyle = { width: 40, height: 40, background: '#f5f5f5', borderRadius: 2 }
 
 export const PlayerSkills = memo(function PlayerSkills({ 

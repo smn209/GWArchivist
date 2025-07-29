@@ -54,6 +54,7 @@ CREATE TABLE gvg_matches (
     guild1_faction UInt8,
     guild1_faction_points UInt32,
     guild1_qualifier_points UInt32,
+    guild1_country Nullable(String),
     guild2_id UInt32,
     guild2_name String,
     guild2_tag String,
@@ -62,9 +63,12 @@ CREATE TABLE gvg_matches (
     guild2_faction UInt8,
     guild2_faction_points UInt32,
     guild2_qualifier_points UInt32,
+    guild2_country Nullable(String),
     state UInt8 DEFAULT 0,
     description Nullable(String),
     vods Array(String),
+    credits Nullable(String),
+    added_to_website Nullable(String),
     created_at DateTime DEFAULT now()
 ) ENGINE = MergeTree()
 PARTITION BY toYYYYMM(match_date)
@@ -95,11 +99,9 @@ CREATE TABLE match_players (
     encoded_name String,
     skill_template_code String,
     used_skills Array(UInt32),
-    match_date Date,
     created_at DateTime DEFAULT now()
 ) ENGINE = MergeTree()
-PARTITION BY toYYYYMM(match_date)
-ORDER BY (match_date, match_id, agent_id)
+ORDER BY (match_id, agent_id)
 SETTINGS index_granularity = 8192;
 
 ALTER TABLE match_players ADD INDEX idx_pseudo_id pseudo_id TYPE minmax GRANULARITY 1;
@@ -118,11 +120,9 @@ CREATE TABLE match_npcs (
     encoded_name LowCardinality(String),
     skill_template_code String,
     used_skills Array(UInt32),
-    match_date Date,
     created_at DateTime DEFAULT now()
 ) ENGINE = MergeTree()
-PARTITION BY toYYYYMM(match_date)
-ORDER BY (match_date, match_id, agent_id)
+ORDER BY (match_id, agent_id)
 SETTINGS index_granularity = 8192;
 
 CREATE TABLE agent_states (

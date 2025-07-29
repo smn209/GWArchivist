@@ -25,19 +25,16 @@ const parseFilters = (searchParams: URLSearchParams): MemorialFilters => {
   const mapId = searchParams.get('mapId')
   const guildId = searchParams.get('guildId')
   
-  if (mapId) filters.mapId = parseInt(mapId)
+  if (mapId) {
+    filters.mapId = mapId
+  }
   if (guildId) filters.guildId = parseInt(guildId)
 
   // profession filters
   for (let i = 1; i <= 10; i++) {
-    const prof = searchParams.get(`profession${i}`)
     const count = searchParams.get(`profession${i}Count`)
     
-    if (prof) {
-      const key = `profession${i}` as keyof MemorialFilters
-      filters[key] = parseInt(prof) as never
-    }
-    if (count) {
+    if (count && parseInt(count) > 0) {
       const key = `profession${i}Count` as keyof MemorialFilters
       filters[key] = parseInt(count) as never
     }
@@ -61,8 +58,18 @@ const buildWhereConditions = (filters: MemorialFilters): { conditions: string[],
   }
 
   if (filters.mapId) {
-    conditions.push('m.map_id = {mapId:UInt32}')
-    params.mapId = filters.mapId
+    const mapValue = String(filters.mapId)
+    if (mapValue.startsWith('map_')) {
+      const mapName = mapValue.substring(4) // Remove 'map_' prefix
+      conditions.push('m.map_name = {mapName:String}')
+      params.mapName = mapName
+    } else if (!isNaN(Number(mapValue))) {
+      conditions.push('m.map_id = {mapId:UInt32}')
+      params.mapId = parseInt(mapValue)
+    } else {
+      conditions.push('m.map_name = {mapName:String}')
+      params.mapName = mapValue
+    }
   }
 
   if (filters.flux) {
@@ -100,10 +107,11 @@ const buildWhereConditions = (filters: MemorialFilters): { conditions: string[],
 
   // profession filtering using subqueries
   for (let i = 1; i <= 10; i++) {
-    const professionKey = `profession${i}` as keyof MemorialFilters
     const countKey = `profession${i}Count` as keyof MemorialFilters
+    const countValue = filters[countKey] as number | undefined
     
-    if (filters[professionKey] && filters[countKey]) {
+    if (countValue && typeof countValue === 'number' && countValue > 0) {
+      console.log(`Adding profession filter for profession ${i} with count ${countValue}`)
       conditions.push(`
         m.match_id IN (
           SELECT mp.match_id 
@@ -113,8 +121,8 @@ const buildWhereConditions = (filters: MemorialFilters): { conditions: string[],
           HAVING count() >= {profession${i}Count:UInt8}
         )
       `)
-      params[`profession${i}`] = filters[professionKey]
-      params[`profession${i}Count`] = filters[countKey]
+      params[`profession${i}`] = i
+      params[`profession${i}Count`] = countValue
     }
   }
 
@@ -127,6 +135,9 @@ const buildWhereConditions = (filters: MemorialFilters): { conditions: string[],
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
+    if (searchParams.get('type')) {
+      return handleFilterOptions(request)
+    }
     const filters = parseFilters(searchParams)
     const { conditions, params } = buildWhereConditions(filters)
     
@@ -200,9 +211,15 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function handleFilterOptions(request: NextRequest) {
   try {
-    const { type, search = '' } = await request.json()
+    const { searchParams } = new URL(request.url)
+    const type = searchParams.get('type')
+    const search = searchParams.get('search') || ''
+
+    if (!type) {
+      return NextResponse.json({ error: 'type parameter is required' }, { status: 400 })
+    }
 
     const queries = {
       occasions: `
@@ -218,10 +235,9 @@ export async function POST(request: NextRequest) {
         ORDER BY flux
       `,
       maps: `
-        SELECT DISTINCT map_id, any(map_name) as map_name
+        SELECT DISTINCT map_id, map_name
         FROM gvg_matches 
-        WHERE map_id > 0 
-        GROUP BY map_id
+        WHERE notEmpty(map_name)
         ORDER BY map_name
       `,
       guilds: search 
@@ -243,7 +259,7 @@ export async function POST(request: NextRequest) {
 
     const query = queries[type as keyof typeof queries]
     if (!query) {
-      return NextResponse.json({ error: 'invalid request type' }, { status: 400 })
+      return NextResponse.json({ error: 'invalid filter type' }, { status: 400 })
     }
 
     const result = await client.query({
@@ -254,9 +270,14 @@ export async function POST(request: NextRequest) {
     const data = await result.json() as QueryResult<Record<string, unknown>>
     
     // optimize response format based on type
-    const response = type === 'occasions' || type === 'fluxes' 
-      ? data.data.map(row => row[type.slice(0, -1)] as string)
-      : data.data
+    let response
+    if (type === 'occasions') {
+      response = data.data.map(row => row.occasion as string)
+    } else if (type === 'fluxes') {
+      response = data.data.map(row => row.flux as string)
+    } else {
+      response = data.data
+    }
 
     return NextResponse.json(response)
     

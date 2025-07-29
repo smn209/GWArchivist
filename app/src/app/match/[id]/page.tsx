@@ -56,7 +56,7 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
       return notFound()
     }
 
-    return <MatchView id={id} data={data} />
+    return <MatchView data={data} />
   } catch {
     return notFound()
   }

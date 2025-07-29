@@ -7,6 +7,13 @@ export async function POST(request: NextRequest) {
     const data: MatchData = await request.json();
     const matchDate = new Date(data.year, data.month - 1, data.day);
     
+    const additionalInfo = {
+      flux: data.flux || null,
+      credits: data.credits || null,
+      added_to_website: data.added_to_website || null,
+      description: data.description || null,
+      vod_urls: Array.isArray(data.vod_urls) ? data.vod_urls : []
+    };
     // extract unique pseudos
     const pseudos = new Set<string>();
     Object.values(data.parties).forEach(party => {
@@ -84,7 +91,7 @@ export async function POST(request: NextRequest) {
       values: [{
         match_id: matchId.toString(),
         map_id: data.map_id,
-        map_name: 'Unknown',
+        map_name: data.map_name || 'Unknown',
         flux: data.flux,
         occasion: data.occasion,
         match_date: matchDate.toISOString().split('T')[0],
@@ -104,6 +111,7 @@ export async function POST(request: NextRequest) {
         guild1_faction: guild1.faction,
         guild1_faction_points: guild1.faction_points,
         guild1_qualifier_points: guild1.qualifier_points,
+        guild1_country: guild1.country,
         guild2_id: guild2DbId,
         guild2_name: guild2.name,
         guild2_tag: guild2.tag,
@@ -112,9 +120,12 @@ export async function POST(request: NextRequest) {
         guild2_faction: guild2.faction,
         guild2_faction_points: guild2.faction_points,
         guild2_qualifier_points: guild2.qualifier_points,
+        guild2_country: guild2.country,
         state: 0,
-        description: null,
-        vods: [],
+        description: additionalInfo.description,
+        vods: additionalInfo.vod_urls,
+        credits: additionalInfo.credits,
+        added_to_website: additionalInfo.added_to_website,
         created_at: new Date().toISOString().split('T')[0] + ' ' + new Date().toTimeString().split(' ')[0]
       }],
       format: 'JSONEachRow'
@@ -142,7 +153,6 @@ export async function POST(request: NextRequest) {
           encoded_name: player.encoded_name,
           skill_template_code: player.skill_template_code,
           used_skills: player.used_skills,
-          match_date: matchDate.toISOString().split('T')[0],
           created_at: new Date().toISOString().split('T')[0] + ' ' + new Date().toTimeString().split(' ')[0]
         });
       });
@@ -172,7 +182,6 @@ export async function POST(request: NextRequest) {
           encoded_name: other.encoded_name,
           skill_template_code: other.skill_template_code,
           used_skills: other.used_skills,
-          match_date: matchDate.toISOString().split('T')[0],
           created_at: new Date().toISOString().split('T')[0] + ' ' + new Date().toTimeString().split(' ')[0]
         });
       });
@@ -284,7 +293,11 @@ export async function GET(request: NextRequest) {
           end_time_ms: matchData.match_end_time_ms,
           end_time_formatted: matchData.match_end_time_formatted,
           winner_party_id: matchData.winner_party_id,
-          winner_guild_id: matchData.winner_guild_id
+          winner_guild_id: matchData.winner_guild_id,
+          description: matchData.description,
+          vods: matchData.vods,
+          credits: matchData.credits,
+          added_to_website: matchData.added_to_website
         },
         guilds: {
           [matchData.guild1_id as string]: {
@@ -357,7 +370,7 @@ export async function GET(request: NextRequest) {
                  m.guild1_faction, m.guild1_faction_points, m.guild1_qualifier_points,
                  m.guild2_id, m.guild2_name, m.guild2_tag, m.guild2_rank, m.guild2_rating,
                  m.guild2_faction, m.guild2_faction_points, m.guild2_qualifier_points,
-                 m.state, m.description, m.vods, m.created_at
+                 m.state, m.description, m.vods, m.credits, m.added_to_website, m.created_at
       `;
       
       const matchResult = await client.query({
@@ -412,7 +425,11 @@ export async function GET(request: NextRequest) {
           end_time_ms: matchData.match_end_time_ms,
           end_time_formatted: matchData.match_end_time_formatted,
           winner_party_id: matchData.winner_party_id,
-          winner_guild_id: matchData.winner_guild_id
+          winner_guild_id: matchData.winner_guild_id,
+          description: matchData.description,
+          vods: matchData.vods,
+          credits: matchData.credits,
+          added_to_website: matchData.added_to_website
         },
         guilds: {
           [matchData.guild1_id as string]: {

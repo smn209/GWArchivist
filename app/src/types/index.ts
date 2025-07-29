@@ -21,6 +21,7 @@ export interface MatchIdRow {
 // match related types
 export interface MatchData {
   map_id: number;
+  map_name?: string;
   flux: string;
   day: number;
   month: number;
@@ -40,6 +41,10 @@ export interface MatchData {
   guilds: {
     [key: string]: Guild;
   };
+  credits?: string;
+  added_to_website?: string;
+  description?: string;
+  vod_urls?: string[];
 }
 
 export interface Player {
@@ -88,6 +93,7 @@ export interface Guild {
   faction_points: number;
   qualifier_points: number;
   cape?: object;
+  country?: string;
 }
 
 export interface Match {
@@ -110,6 +116,10 @@ export interface Match {
 export interface MatchInfo {
   match_id: string;
   winner_guild_id: number;
+  description?: string;
+  vods?: string[];
+  credits?: string;
+  added_to_website?: string;
 }
 
 export interface MatchDetail {
@@ -205,7 +215,7 @@ export interface MemorialFilters {
   search?: string
   dateFrom?: string
   dateTo?: string
-  mapId?: number
+  mapId?: number | string
   flux?: string
   occasion?: string
   profession1?: number
@@ -270,6 +280,23 @@ export interface FilterOptions {
   fluxes: string[]
   maps: { map_id: number; map_name: string }[]
   guilds: { id: number; name: string; tag: string }[]
+}
+
+export interface MatchViewProps {
+  data: {
+    match_info: {
+      match_id: string;
+      winner_guild_id?: number;
+    };
+    guilds: Record<string, {
+      id: number;
+      name: string;
+      tag: string;
+    }>;
+    parties: Record<string, {
+      PLAYER: Player[];
+    }>;
+  };
 }
 
 export const PROFESSIONS = [
