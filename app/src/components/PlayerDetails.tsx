@@ -9,32 +9,66 @@ const playerCardStyle = {
   border: '1px solid #eee',
   borderRadius: 4,
   padding: 8,
-  marginBottom: 8,
-  color: '#111'
-}
-
-const headerStyle = {
+  marginBottom: 4,
+  color: '#111',
   display: 'flex',
   alignItems: 'center',
-  gap: 6,
-  marginBottom: 6
+  gap: 8,
+  minWidth: 320,
+  maxWidth: 570,
+  width: '100%',
+  height: 70
 }
 
-const nameStyle = { fontWeight: 500 }
-const idStyle = { color: '#555', fontSize: 12 }
-const infoStyle = { fontSize: 12, color: '#555', marginTop: 2 }
+const playerInfoStyle = {
+  display: 'flex',
+  flexDirection: 'column' as const,
+  alignItems: 'flex-start',
+  gap: 4,
+  minWidth: 120,
+  maxWidth: 200,
+  flex: 1
+}
+
+const professionIconsStyle = {
+  display: 'flex',
+  gap: 2,
+  alignItems: 'center'
+}
+
+const pseudoStyle = { 
+  fontWeight: 500,
+  fontSize: 16,
+  whiteSpace: 'nowrap' as const,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  width: '100%'
+}
+
+const skillsContainerStyle = {
+  display: 'flex',
+  gap: 1,
+  marginLeft: 'auto',
+  flexShrink: 0
+}
 
 export const PlayerDetails = memo(function PlayerDetails({ player }: PlayerDetailsProps) {
   return (
     <div style={playerCardStyle}>
-      <div style={headerStyle}>
-        <ProfessionImage profId={player.build.primary} width={24} height={24} />
-        <ProfessionImage profId={player.build.secondary} width={24} height={24} />
-        <span style={nameStyle}>{player.pseudo.name}</span>
-        <span style={idStyle}>#{player.pseudo.id}</span>
+      <div style={playerInfoStyle}>
+        <div style={professionIconsStyle}>
+          {player.build.primary > 0 && (
+            <ProfessionImage profId={player.build.primary} width={20} height={20} />
+          )}
+          {player.build.secondary > 0 && (
+            <ProfessionImage profId={player.build.secondary} width={20} height={20} />
+          )}
+        </div>
+        <div style={pseudoStyle}>{player.pseudo.name}</div>
       </div>
-      <PlayerSkills skills={player.build.skills} />
-      <div style={infoStyle}>Position: {player.position} | Guild: {player.guild_id}</div>
+      <div style={skillsContainerStyle}>
+        <PlayerSkills skills={player.build.skills} />
+      </div>
     </div>
   )
 }) 
