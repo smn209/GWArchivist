@@ -34,10 +34,9 @@ export async function GET(
         SELECT 
           mp.*,
           p.pseudo as pseudo_name_resolved,
-          u.username
+          '' as username
         FROM match_players mp
         LEFT JOIN pseudos p ON mp.pseudo_id = p.id
-        LEFT JOIN users u ON p.user_id = u.id
         WHERE mp.match_id = {match_id:UInt64}
         ORDER BY mp.team_id, mp.player_number
       `,

@@ -38,14 +38,18 @@ export async function POST(request: NextRequest) {
         await client.insert({
           table: 'pseudos',
           values: [{
-            id: newId,
             pseudo,
             user_id: null,
             created_at: new Date().toISOString().split('T')[0] + ' ' + new Date().toTimeString().split(' ')[0]
           }],
           format: 'JSONEachRow'
         });
-        pseudoIds.set(pseudo, newId);
+        const newPseudo = await client.query({
+          query: 'SELECT id FROM pseudos WHERE pseudo = {pseudo:String} ORDER BY created_at DESC LIMIT 1',
+          query_params: { pseudo }
+        });
+        const newRows = await newPseudo.json() as QueryResult<{ id: number }>;
+        pseudoIds.set(pseudo, newRows.data[0].id);
       }
     }
 
@@ -59,18 +63,21 @@ export async function POST(request: NextRequest) {
       
       const rows = await existingGuild.json() as QueryResult<{ id: number }>;
       if (rows.data.length === 0) {
-        const newGuildId = Math.floor(Math.random() * 1000000) + Date.now();
         await client.insert({
           table: 'guilds',
           values: [{
-            id: newGuildId,
             name: guildData.name,
             tag: guildData.tag,
             created_at: new Date().toISOString().split('T')[0] + ' ' + new Date().toTimeString().split(' ')[0]
           }],
           format: 'JSONEachRow'
         });
-        guildDbIds.set(parseInt(matchGuildId), newGuildId);
+        const newGuild = await client.query({
+          query: 'SELECT id FROM guilds WHERE name = {name:String} ORDER BY created_at DESC LIMIT 1',
+          query_params: { name: guildData.name }
+        });
+        const newRows = await newGuild.json() as QueryResult<{ id: number }>;
+        guildDbIds.set(parseInt(matchGuildId), newRows.data[0].id);
       } else {
         guildDbIds.set(parseInt(matchGuildId), rows.data[0].id);
       }

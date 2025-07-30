@@ -1,7 +1,7 @@
 CREATE DATABASE IF NOT EXISTS gwarchivist;
 
 CREATE TABLE users (
-    id UInt32,
+    id UInt64 DEFAULT toUnixTimestamp64Nano(now64(9)),
     username String,
     email Nullable(String),
     password_hash String,
@@ -13,7 +13,7 @@ ORDER BY id
 SETTINGS index_granularity = 8192;
 
 CREATE TABLE guilds (
-    id UInt32,
+    id UInt64 DEFAULT toUnixTimestamp64Nano(now64(9)),
     name String,
     tag String,
     created_at DateTime DEFAULT now()
@@ -22,9 +22,9 @@ ORDER BY id
 SETTINGS index_granularity = 8192;
 
 CREATE TABLE pseudos (
-    id UInt32,
+    id UInt64 DEFAULT toUnixTimestamp64Nano(now64(9)),
     pseudo String,
-    user_id Nullable(UInt32),
+    user_id Nullable(UInt64),
     created_at DateTime DEFAULT now()
 ) ENGINE = MergeTree()
 ORDER BY id
@@ -45,8 +45,8 @@ CREATE TABLE gvg_matches (
     match_end_time_ms UInt32,
     match_end_time_formatted String,
     winner_party_id UInt8,
-    winner_guild_id UInt32,
-    guild1_id UInt32,
+    winner_guild_id UInt64,
+    guild1_id UInt64,
     guild1_name String,
     guild1_tag String,
     guild1_rank UInt32,
@@ -55,7 +55,7 @@ CREATE TABLE gvg_matches (
     guild1_faction_points UInt32,
     guild1_qualifier_points UInt32,
     guild1_country Nullable(String),
-    guild2_id UInt32,
+    guild2_id UInt64,
     guild2_name String,
     guild2_tag String,
     guild2_rank UInt32,
@@ -85,9 +85,9 @@ ALTER TABLE gvg_matches ADD INDEX idx_occasion occasion TYPE set(100) GRANULARIT
 CREATE TABLE match_players (
     match_id UInt64,
     agent_id UInt32,
-    pseudo_id UInt32,
+    pseudo_id UInt64,
     pseudo_name String,
-    guild_id UInt32,
+    guild_id UInt64,
     team_id UInt8,
     party_id UInt8,
     player_number UInt8,
@@ -107,6 +107,10 @@ SETTINGS index_granularity = 8192;
 ALTER TABLE match_players ADD INDEX idx_pseudo_id pseudo_id TYPE minmax GRANULARITY 1;
 ALTER TABLE match_players ADD INDEX idx_guild_id guild_id TYPE minmax GRANULARITY 1;
 ALTER TABLE match_players ADD INDEX idx_used_skills used_skills TYPE bloom_filter GRANULARITY 1;
+
+ALTER TABLE users ADD INDEX idx_username username TYPE set(0) GRANULARITY 1;
+ALTER TABLE guilds ADD INDEX idx_guild_name name TYPE set(0) GRANULARITY 1;
+ALTER TABLE pseudos ADD INDEX idx_pseudo_name pseudo TYPE set(0) GRANULARITY 1;
 
 CREATE TABLE match_npcs (
     match_id UInt64,
