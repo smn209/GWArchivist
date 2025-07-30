@@ -3,13 +3,13 @@ import { ProfessionImage } from "../components/ProfessionImage"
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "../components/ui/table"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Match, MatchDetail } from '@/types'
+import { HomeViewMatch, MatchDetail } from '@/types'
 import Image from "next/image"
 import Link from "next/link"
 import { Input } from "../components/ui/input"
 
 export function HomeView() {
-  const [matches, setMatches] = useState<Match[]>([])
+  const [matches, setMatches] = useState<HomeViewMatch[]>([])
   const [matchDetails, setMatchDetails] = useState<Record<string, MatchDetail>>({})
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
@@ -28,7 +28,7 @@ export function HomeView() {
         setMatches(matchData)
         
         if (matchData.length > 0) {
-          const matchIdsString = matchData.map((match: Match) => match.match_id).join(',')
+          const matchIdsString = matchData.map((match: HomeViewMatch) => match.match_id).join(',')
           fetch(`/api/matchs?match_ids=${matchIdsString}`)
             .then(res => res.json())
             .then(detailsArray => {

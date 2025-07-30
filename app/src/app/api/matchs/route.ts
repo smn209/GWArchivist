@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import client from '@/lib/clickhouse';
-import { MatchData, QueryResult, PseudoRow, GuildRow } from '@/types';
+import { MatchData, QueryResult } from '@/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
         query_params: { pseudo }
       });
       
-      const rows = await existingPseudo.json() as QueryResult<PseudoRow>;
+      const rows = await existingPseudo.json() as QueryResult<{ id: number }>;
       if (rows.data.length > 0) {
         pseudoIds.set(pseudo, rows.data[0].id);
       } else {
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         query_params: { name: guildData.name }
       });
       
-      const rows = await existingGuild.json() as QueryResult<GuildRow>;
+      const rows = await existingGuild.json() as QueryResult<{ id: number }>;
       if (rows.data.length === 0) {
         const newGuildId = Math.floor(Math.random() * 1000000) + Date.now();
         await client.insert({

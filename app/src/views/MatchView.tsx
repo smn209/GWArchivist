@@ -17,6 +17,12 @@ export function MatchView({ data }: MatchViewProps) {
     }
   }
   
+  const getGuildForTeam = (teamId: string) => {
+    const firstPlayer = data.parties[teamId]?.PLAYER?.[0]
+    if (!firstPlayer) return null
+    return Object.values(data.guilds).find(g => g.id === firstPlayer.guild_id)
+  }
+  
   return (
     <div className="min-h-screen flex flex-col w-full bg-white">
       <div className="relative w-full h-[15vh]">
@@ -64,15 +70,15 @@ export function MatchView({ data }: MatchViewProps) {
       <div className="text-center py-8">
         <div className="flex items-center justify-center gap-4">
           <div className="text-2xl font-bold text-black flex items-center">
-            {data.guilds[data.parties[1]?.PLAYER?.[0]?.guild_id]?.name}
-            {data.match_info.winner_guild_id === data.guilds[data.parties[1]?.PLAYER?.[0]?.guild_id]?.id && (
+            {getGuildForTeam("1")?.name}
+            {data.match_info.winner_guild_id === getGuildForTeam("1")?.id && (
               <span className="ml-2" aria-label="Winner">🏆</span>
             )}
           </div>
           <span className="text-xl text-gray-500">vs</span>
           <div className="text-2xl font-bold text-black flex items-center">
-            {data.guilds[data.parties[2]?.PLAYER?.[0]?.guild_id]?.name}
-            {data.match_info.winner_guild_id === data.guilds[data.parties[2]?.PLAYER?.[0]?.guild_id]?.id && (
+            {getGuildForTeam("2")?.name}
+            {data.match_info.winner_guild_id === getGuildForTeam("2")?.id && (
               <span className="ml-2" aria-label="Winner">🏆</span>
             )}
           </div>
@@ -84,8 +90,8 @@ export function MatchView({ data }: MatchViewProps) {
           {[1, 2].map(teamId => (
             <div key={teamId} className="rounded-lg p-4 bg-white shadow-lg border border-gray-300 w-full lg:w-auto lg:flex-shrink-0">
             <h2 className="text-lg font-semibold mb-2 text-black">
-              {data.guilds[data.parties[teamId]?.PLAYER?.[0]?.guild_id]?.name} [
-              {data.guilds[data.parties[teamId]?.PLAYER?.[0]?.guild_id]?.tag}]
+              {getGuildForTeam(teamId.toString())?.name} [
+              {getGuildForTeam(teamId.toString())?.tag}]
             </h2>
             <div>
               {data.parties[teamId]?.PLAYER?.map((player: Player, index: number) => (

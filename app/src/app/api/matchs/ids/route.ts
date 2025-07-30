@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import client from '@/lib/clickhouse';
-import { QueryResult, MatchIdRow } from '@/types';
+import { QueryResult } from '@/types';
 
 export async function GET() {
   try {
@@ -11,7 +11,7 @@ export async function GET() {
     `;
     
     const result = await client.query({ query });
-    const matches = (await result.json() as QueryResult<MatchIdRow>).data;
+    const matches = (await result.json() as QueryResult<{ match_id: string }>).data;
     
     return NextResponse.json(matches.map(match => match.match_id));
   } catch {
