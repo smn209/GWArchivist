@@ -52,7 +52,7 @@ const skillsContainerStyle = {
   flexShrink: 0
 }
 
-export const PlayerDetails = memo(function PlayerDetails({ player }: PlayerDetailsProps) {
+export const PlayerDetails = memo(function PlayerDetails({ player, skillsClickable = false }: PlayerDetailsProps) {
   return (
     <div style={playerCardStyle}>
       <div style={playerInfoStyle}>
@@ -67,7 +67,7 @@ export const PlayerDetails = memo(function PlayerDetails({ player }: PlayerDetai
         <div style={pseudoStyle}>{player.pseudo.name}</div>
       </div>
       <div style={skillsContainerStyle}>
-        <PlayerSkills skills={player.build.skills} />
+        <PlayerSkills skills={player.build.skills} clickable={skillsClickable} />
       </div>
     </div>
   )

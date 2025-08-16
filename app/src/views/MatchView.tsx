@@ -65,6 +65,7 @@ export function MatchView({ data }: MatchViewProps) {
                       skills: player.used_skills || []
                     }
                   }}
+                  skillsClickable={true}
                 />
               ))}
             </div>

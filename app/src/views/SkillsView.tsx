@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { 
   Profession, 
   Attribute,
@@ -56,6 +57,7 @@ const PROFESSION_ATTRIBUTES: Record<Profession, Attribute[]> = {
 const SkillItem = ({ skillId, skillName }: { skillId: number; skillName: string }) => {
   const [hasValidImage, setHasValidImage] = useState(false)
   const [imageChecked, setImageChecked] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -72,6 +74,10 @@ const SkillItem = ({ skillId, skillName }: { skillId: number; skillName: string 
     img.src = `/skills/${getSkillImageId(skillId)}.jpg`
   }, [skillId])
 
+  const handleSkillClick = () => {
+    router.push(`/skill/${skillId}`)
+  }
+
   if (!imageChecked || !hasValidImage) return null
 
   return (
@@ -81,10 +87,14 @@ const SkillItem = ({ skillId, skillName }: { skillId: number; skillName: string 
         width={28} 
         height={28}
         className="flex-shrink-0"
+        clickable={true}
       />
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className="text-sm text-gray-700 cursor-pointer hover:text-gray-900">
+          <span 
+            className="text-sm text-gray-700 cursor-pointer hover:text-gray-900"
+            onClick={handleSkillClick}
+          >
             {skillName}
           </span>
         </TooltipTrigger>

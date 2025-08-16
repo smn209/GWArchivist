@@ -146,11 +146,13 @@ export interface SkillImageProps {
   height: number;
   className?: string;
   showTooltip?: boolean;
+  clickable?: boolean;
 }
 
 export interface PlayerSkillsProps {
   skills: number[];
   className?: string;
+  clickable?: boolean;
 }
 
 export interface WallpaperProps {
@@ -169,6 +171,7 @@ export interface PlayerDetailsProps {
       skills: number[];
     };
   };
+  skillsClickable?: boolean;
 }
 
 export interface MemorialFilters {

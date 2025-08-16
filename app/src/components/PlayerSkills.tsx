@@ -8,7 +8,8 @@ const emptySkillStyle = { width: 40, height: 40, background: '#f5f5f5', borderRa
 
 export const PlayerSkills = memo(function PlayerSkills({ 
   skills, 
-  className 
+  className,
+  clickable = false
 }: PlayerSkillsProps) {
   return (
     <div className={className} style={containerStyle}>
@@ -16,7 +17,13 @@ export const PlayerSkills = memo(function PlayerSkills({
         skill === 0 ? (
           <div key={`empty-${i}`} style={emptySkillStyle} />
         ) : (
-          <SkillImage key={`skill-${skill}-${i}`} skillId={skill} width={40} height={40} />
+          <SkillImage 
+            key={`skill-${skill}-${i}`} 
+            skillId={skill} 
+            width={40} 
+            height={40} 
+            clickable={clickable}
+          />
         )
       )}
     </div>
