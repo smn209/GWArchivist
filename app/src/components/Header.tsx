@@ -8,12 +8,14 @@ interface HeaderProps {
   searchPlaceholder?: string
   showSearch?: boolean
   onSearch?: (query: string) => void
+  showBanner?: boolean
 }
 
 export function Header({ 
   searchPlaceholder = "Search matches...", 
   showSearch = true,
-  onSearch 
+  onSearch,
+  showBanner = true
 }: HeaderProps = {}) {
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
@@ -29,7 +31,18 @@ export function Header({
   }
 
   return (
-    <nav className="w-full flex items-center justify-between py-4 bg-white border-b border-gray-200 z-50 gap-4 px-20" role="navigation" aria-label="Main navigation"> 
+    <>
+      {showBanner && (
+        <div className="relative w-full h-[15vh]">
+          <Image 
+            src="/wallpapers/concepts/_4s7__concept_art.jpg" 
+            alt="Guild Wars Concept Art" 
+            fill
+            className="object-cover"
+          />
+        </div>
+      )}
+      <nav className="w-full flex items-center justify-between py-4 bg-white border-b border-gray-200 z-50 gap-4 px-20" role="navigation" aria-label="Main navigation"> 
       <div className="flex-1">
         <Link href="/" className="inline-block hover:opacity-80 transition-opacity" aria-label="Go to home page">
           <Image 
@@ -72,5 +85,6 @@ export function Header({
         </Link>
       </div>
     </nav>
+    </>
   )
 } 

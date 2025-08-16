@@ -155,11 +155,6 @@ export interface PlayerSkillsProps {
   clickable?: boolean;
 }
 
-export interface WallpaperProps {
-  children: React.ReactNode;
-  src?: string;
-}
-
 export interface PlayerDetailsProps {
   player: {
     pseudo: { id: number; name: string };

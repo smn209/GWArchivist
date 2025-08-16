@@ -146,15 +146,6 @@ export function SkillsView() {
 
   return (
     <div className="min-h-screen flex flex-col w-full bg-white">
-      <div className="relative w-full h-[15vh]">
-        <Image 
-          src="/wallpapers/concepts/_4s7__concept_art.jpg" 
-          alt="Guild Wars Concept Art" 
-          fill
-          className="object-cover"
-        />
-      </div>
-      
       <Header />
 
       <div className="flex-1 p-6">
