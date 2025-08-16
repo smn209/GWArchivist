@@ -36,11 +36,12 @@ jobs:
             --user "dev:dev" \
             -d "CREATE DATABASE IF NOT EXISTS gwarchivist"
           
-          # Execute schema using clickhouse-client with multiquery support
+          # Copy schema file to container and execute
           echo "Loading tables..."
+          docker cp database/schema.sql gwgvg_clickhouse:/tmp/schema.sql
           docker exec gwgvg_clickhouse clickhouse-client \
             --user=dev --password=dev --database=gwarchivist \
-            --multiquery < database/schema.sql
+            --multiquery --file=/tmp/schema.sql
           
           # Verify database and tables exist
           echo "=== Verifying databases ==="
