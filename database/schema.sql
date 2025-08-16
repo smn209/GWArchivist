@@ -1,5 +1,7 @@
 CREATE DATABASE IF NOT EXISTS gwarchivist;
 
+USE gwarchivist;
+
 CREATE TABLE users (
     id UInt64 DEFAULT toUnixTimestamp64Nano(now64(9)),
     username String,

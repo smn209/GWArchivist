@@ -15,21 +15,30 @@ jobs:
       - name: Start ClickHouse via docker compose
         run: |
           docker compose -f database/docker-compose.yml up -d
-          # wait for ClickHouse HTTP port and schema initialization
-          echo "Waiting for ClickHouse to start and initialize schema..."
-          for i in $(seq 1 90); do
+          # wait for ClickHouse HTTP port
+          echo "Waiting for ClickHouse to start..."
+          for i in $(seq 1 60); do
             if curl -sSf "http://127.0.0.1:8123/" > /dev/null 2>&1; then
-              echo "ClickHouse is up, waiting for schema initialization..."
-              sleep 10
-              # Test if database exists
-              if curl -sSf "http://127.0.0.1:8123/" --user "dev:dev" -d "SHOW DATABASES" | grep -q "gwarchivist"; then
-                echo "ClickHouse is ready with schema loaded"
-                break
-              fi
+              echo "ClickHouse is up!"
+              break
             fi
             echo "waiting for clickhouse... $i"
             sleep 2
           done
+          
+      - name: Initialize database schema
+        run: |
+          echo "Loading database schema..."
+          # Execute the schema file
+          curl -X POST "http://127.0.0.1:8123/" \
+            --user "dev:dev" \
+            --data-binary @database/schema.sql
+          
+          # Verify database and tables exist
+          echo "Verifying schema..."
+          curl -sSf "http://127.0.0.1:8123/" --user "dev:dev" -d "SHOW DATABASES"
+          curl -sSf "http://127.0.0.1:8123/" --user "dev:dev" -d "SHOW TABLES FROM gwarchivist"
+          echo "Schema loaded successfully!"
 
       - name: Setup Node
         uses: actions/setup-node@v4
