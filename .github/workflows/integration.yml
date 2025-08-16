@@ -29,16 +29,33 @@ jobs:
       - name: Initialize database schema
         run: |
           echo "Loading database schema..."
-          # Execute the schema file
+          
+          # Create database first
+          echo "Creating database..."
           curl -X POST "http://127.0.0.1:8123/" \
             --user "dev:dev" \
-            --data-binary @database/schema.sql
+            -d "CREATE DATABASE IF NOT EXISTS gwarchivist"
+          
+          # Execute schema using clickhouse-client with multiquery support
+          echo "Loading tables..."
+          docker exec gwgvg_clickhouse clickhouse-client \
+            --user=dev --password=dev --database=gwarchivist \
+            --multiquery < database/schema.sql
           
           # Verify database and tables exist
-          echo "Verifying schema..."
+          echo "=== Verifying databases ==="
           curl -sSf "http://127.0.0.1:8123/" --user "dev:dev" -d "SHOW DATABASES"
-          curl -sSf "http://127.0.0.1:8123/" --user "dev:dev" -d "SHOW TABLES FROM gwarchivist"
-          echo "Schema loaded successfully!"
+          
+          echo "=== Verifying tables in gwarchivist ==="
+          tables=$(curl -sSf "http://127.0.0.1:8123/" --user "dev:dev" -d "SHOW TABLES FROM gwarchivist")
+          echo "$tables"
+          
+          if echo "$tables" | grep -q "pseudos"; then
+            echo "Schema loaded successfully!"
+          else
+            echo "Schema loading failed - pseudos table not found"
+            exit 1
+          fi
 
       - name: Setup Node
         uses: actions/setup-node@v4
