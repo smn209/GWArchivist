@@ -1,7 +1,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Input } from "./ui/input"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { useState } from "react"
 
 interface HeaderProps {
@@ -19,6 +19,23 @@ export function Header({
 }: HeaderProps = {}) {
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
+  const pathname = usePathname()
+  
+  const getWallpaperForRoute = () => {
+    if (pathname.startsWith('/skills')) {
+      return "/wallpapers/concepts/_Twin_Towers__concept_art.jpg"
+    }
+    if (pathname.startsWith('/skill/')) {
+      return "/wallpapers/concepts/_Twin_Towers__concept_art.jpg"
+    }
+    if (pathname.startsWith('/memorial')) {
+      return "/wallpapers/concepts/_Tower_Scene__concept_art.jpg"
+    }
+    if (pathname.startsWith('/match')) {
+      return "/wallpapers/uncharted.png"
+    }
+    return "/wallpapers/concepts/_4s7__concept_art.jpg"
+  }
   
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
@@ -33,9 +50,9 @@ export function Header({
   return (
     <>
       {showBanner && (
-        <div className="relative w-full h-[15vh]">
+        <div className="relative w-full h-[20vh]">
           <Image 
-            src="/wallpapers/concepts/_4s7__concept_art.jpg" 
+            src={getWallpaperForRoute()} 
             alt="Guild Wars Concept Art" 
             fill
             className="object-cover"
