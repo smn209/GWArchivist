@@ -1,6 +1,8 @@
 name: Integration - Dev + API POST (simple)
 
 on:
+  push:
+  pull_request:
   workflow_dispatch:
 
 jobs:
