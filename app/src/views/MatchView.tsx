@@ -2,7 +2,7 @@
 import { PlayerDetails } from '../components/PlayerDetails'
 import { Header } from '../components/Header'
 import { Player, MatchViewProps } from '@/types'
-import Image from "next/image"
+
 
 export function MatchView({ data }: MatchViewProps) {
   

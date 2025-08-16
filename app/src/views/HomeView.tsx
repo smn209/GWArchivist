@@ -5,7 +5,7 @@ import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from ".
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { HomeViewMatch, MatchDetail } from '@/types'
-import Image from "next/image"
+
 
 export function HomeView() {
   const [matches, setMatches] = useState<HomeViewMatch[]>([])

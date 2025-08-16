@@ -15,7 +15,7 @@ import { ProfessionImage } from '../components/ProfessionImage'
 import { SkillImage } from '../components/SkillImage'
 import { Tooltip, TooltipTrigger, TooltipContent } from '../components/ui/tooltip'
 import { SkillTooltip } from '../components/SkillTooltip'
-import Image from 'next/image'
+
 import { Input } from '../components/ui/input'
 
 const PROFESSION_ATTRIBUTES: Record<Profession, Attribute[]> = {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import client from '../../../../../lib/clickhouse'
+import { QueryResult, SkillMatchPlayer, SkillMatch } from '../../../../../types'
 
 export async function GET(
   request: NextRequest,
@@ -64,13 +65,13 @@ export async function GET(
       })
     ])
 
-    const matchResult = await matchData.json() as { data: any[] }
-    const countQueryResult = await countData.json() as { data: any[] }
+    const matchResult = await matchData.json() as QueryResult<SkillMatchPlayer & { match_id: string; match_date: string; map_name: string; occasion: string; flux: string }>
+    const countQueryResult = await countData.json() as QueryResult<{ total: number }>
     
     const matches = matchResult.data
     const total = countQueryResult.data[0]?.total || 0
 
-    const matchesGrouped = matches.reduce((acc: any, row: any) => {
+    const matchesGrouped = matches.reduce((acc: Record<string, SkillMatch>, row) => {
       const matchId = row.match_id
       if (!acc[matchId]) {
         acc[matchId] = {

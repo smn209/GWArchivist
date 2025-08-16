@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Header } from '../components/Header'
 import { PlayerSkills } from '../components/PlayerSkills'
 import { ProfessionImage } from '../components/ProfessionImage'
@@ -15,42 +15,14 @@ import {
   type Profession,
   type Attribute
 } from '../lib/skills'
+import { SkillMatch, SkillMatchesResponse } from '@/types'
 import Image from 'next/image'
 
 interface SkillDetailViewProps {
   skillId: number
 }
 
-interface SkillMatchPlayer {
-  player_number: number
-  guild_id: number
-  encoded_name: string
-  primary_profession: number
-  secondary_profession: number
-  used_skills: number[]
-  guild_name: string
-  guild_tag: string
-  guild_rank: number
-}
 
-interface SkillMatch {
-  match_id: string
-  match_date: string
-  map_name: string
-  occasion: string
-  flux: string
-  players: SkillMatchPlayer[]
-}
-
-interface SkillMatchesResponse {
-  matches: SkillMatch[]
-  pagination: {
-    total: number
-    limit: number
-    offset: number
-    hasMore: boolean
-  }
-}
 
 export function SkillDetailView({ skillId }: SkillDetailViewProps) {
   const [matches, setMatches] = useState<SkillMatch[]>([])
@@ -60,11 +32,7 @@ export function SkillDetailView({ skillId }: SkillDetailViewProps) {
   const skillDetail = getSkillDetails(skillId)
   const imageId = getSkillImageId(skillId)
   
-  useEffect(() => {
-    loadMatches()
-  }, [skillId])
-
-  const loadMatches = async (resetOffset = true) => {
+  const loadMatches = useCallback(async (resetOffset = true) => {
     setLoading(true)
     try {
       const newOffset = resetOffset ? 0 : pagination.offset + pagination.limit
@@ -83,7 +51,11 @@ export function SkillDetailView({ skillId }: SkillDetailViewProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [skillId, pagination.offset, pagination.limit])
+
+  useEffect(() => {
+    loadMatches()
+  }, [loadMatches])
   
   if (!skillDetail) {
     return (

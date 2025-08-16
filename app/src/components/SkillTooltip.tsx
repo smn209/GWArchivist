@@ -34,7 +34,7 @@ export const SkillTooltip = memo(function SkillTooltip({ skillId }: SkillTooltip
       .replace(/\*([^*]+)\*/g, '<em>$1</em>')
       .replace(/%[sdb](\d+)\.\.%[sdb](\d+)/g, (match, min, max) => `${min}...${max}`)
     
-    return formatted.split(' ').reduce((lines: string[], word, i, words) => {
+    return formatted.split(' ').reduce((lines: string[], word, i) => {
       const currentLine = lines[lines.length - 1] || ''
       const testLine = currentLine ? `${currentLine} ${word}` : word
       
@@ -50,7 +50,7 @@ export const SkillTooltip = memo(function SkillTooltip({ skillId }: SkillTooltip
   }
 
   const stats = [
-    { condition: skillDetail.z?.d < 0, icon: 'Tango-upkeep.png', value: Math.abs(skillDetail.z?.d || 0), color: 'text-purple-600' },
+    { condition: (skillDetail.z?.d || 0) < 0, icon: 'Tango-upkeep.png', value: Math.abs(skillDetail.z?.d || 0), color: 'text-purple-600' },
     { condition: (skillDetail.z?.a || 0) > 0, icon: 'Tango-adrenaline.png', value: skillDetail.z?.a, color: 'text-yellow-600' },
     { condition: true, icon: 'Tango-energy.png', value: skillDetail.z?.e || 0, color: 'text-blue-600' },
     { condition: (skillDetail.z?.s || 0) > 0, icon: 'Tango-sacrifice.png', value: skillDetail.z?.s, color: 'text-red-700' },

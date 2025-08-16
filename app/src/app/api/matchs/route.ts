@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       if (rows.data.length > 0) {
         pseudoIds.set(pseudo, rows.data[0].id);
       } else {
-        const newId = Math.floor(Math.random() * 1000000) + Date.now();
+
         await client.insert({
           table: 'pseudos',
           values: [{
