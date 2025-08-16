@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Calendar, Trophy, Filter } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
+import { Header } from "../components/Header"
 import { ProfessionImage } from "../components/ProfessionImage"
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "../components/ui/table"
 import { Input } from "../components/ui/input"
@@ -309,27 +309,7 @@ export default function MemorialView() {
         />
       </div>
 
-      <div className="w-full flex items-center justify-between py-4 px-20 border-b border-gray-200">
-        <div className="flex-1">
-          <Link href="/" className="inline-block hover:opacity-80 transition-opacity" aria-label="Go to home page">
-            <Image
-              src="/icons/The_Frog.png"
-              alt="The Frog logo"
-              width={40}
-              height={40}
-              className="rounded"
-            />
-          </Link>
-        </div>
-        <div className="flex-1 flex justify-center">
-          <span className="text-black font-medium">Search in archive</span>
-        </div>
-        <div className="flex-1 flex justify-end">
-          <span className="px-4 py-2 rounded-md font-medium text-black">
-            Memorial
-          </span>
-        </div>
-      </div>
+      <Header showSearch={false} />
 
       <div className="text-center py-8">
         <h1 className="text-5xl font-bold mb-4 text-black">Memorial Archive</h1>

@@ -1,24 +1,16 @@
 "use client"
 import { ProfessionImage } from "../components/ProfessionImage"
+import { Header } from "../components/Header"
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "../components/ui/table"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { HomeViewMatch, MatchDetail } from '@/types'
 import Image from "next/image"
-import Link from "next/link"
-import { Input } from "../components/ui/input"
 
 export function HomeView() {
   const [matches, setMatches] = useState<HomeViewMatch[]>([])
   const [matchDetails, setMatchDetails] = useState<Record<string, MatchDetail>>({})
-  const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
-  
-  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && searchQuery.trim()) {
-      router.push(`/memorial?search=${encodeURIComponent(searchQuery.trim())}`)
-    }
-  }
 
   useEffect(() => {
     fetch("/api/matchs?limit=10")
@@ -53,36 +45,7 @@ export function HomeView() {
         />
       </div>
       
-      <div className="w-full flex items-center justify-between py-4 px-20 border-b border-gray-200">
-        <div className="flex-1">
-          <Image 
-            src="/icons/The_Frog.png" 
-            alt="The Frog logo" 
-            width={40} 
-            height={40}
-            className="rounded"
-          />
-        </div>
-        <div className="flex-1 flex justify-center">
-          <Input 
-            placeholder="Search matches..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={handleSearch}
-            className="max-w-xs w-full bg-white border-gray-300 text-black placeholder:text-gray-500 focus:ring-2 focus:ring-gray-400 focus:border-gray-400" 
-            aria-label="Search matches"
-          />
-        </div>
-        <div className="flex-1 flex justify-end">
-          <Link 
-            href="/memorial" 
-            className="px-4 py-2 rounded-md hover:bg-gray-100 transition-colors font-medium text-black focus:outline-none focus:ring-2 focus:ring-gray-400"
-            aria-label="Go to Memorial page"
-          >
-            Memorial
-          </Link>
-        </div>
-      </div>
+      <Header />
       
       <div className="flex flex-col items-center py-8">
         <h1 className="text-5xl font-bold text-black mb-2">Guild Wars</h1>

@@ -9,12 +9,12 @@ import {
   getSkillDetails,
   getSkillImageId
 } from '../lib/skills'
+import { Header } from '../components/Header'
 import { ProfessionImage } from '../components/ProfessionImage'
 import { SkillImage } from '../components/SkillImage'
 import { Tooltip, TooltipTrigger, TooltipContent } from '../components/ui/tooltip'
 import { SkillTooltip } from '../components/SkillTooltip'
 import Image from 'next/image'
-import Link from 'next/link'
 import { Input } from '../components/ui/input'
 
 const PROFESSION_ATTRIBUTES: Record<Profession, Attribute[]> = {
@@ -145,41 +145,20 @@ export function SkillsView() {
         />
       </div>
       
-      <div className="w-full flex items-center justify-between py-4 px-20 border-b border-gray-200">
-        <div className="flex-1">
-          <Link href="/" className="inline-block hover:opacity-80 transition-opacity">
-            <Image 
-              src="/icons/The_Frog.png" 
-              alt="The Frog logo" 
-              width={40} 
-              height={40}
-              className="rounded"
-            />
-          </Link>
-        </div>
-        <div className="flex-1 flex justify-center">
-          <Input 
-            placeholder="Search skills..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="max-w-xs w-full bg-white border-gray-300 text-black placeholder:text-gray-500" 
-          />
-        </div>
-        <div className="flex-1 flex justify-end">
-          <Link 
-            href="/memorial" 
-            className="px-4 py-2 rounded-md hover:bg-gray-100 transition-colors font-medium text-black"
-          >
-            Memorial
-          </Link>
-        </div>
-      </div>
+      <Header />
 
       <div className="flex-1 p-6">
         <div className="max-w-7xl mx-auto">
-          {/* Title */}
           <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">Guild Wars Skills</h1>
           
+          <div className="flex justify-center mb-8">
+            <Input 
+              placeholder="Search skills..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="max-w-xs w-full bg-white border-gray-300 text-black placeholder:text-gray-500" 
+            />
+          </div>
           <div className="flex justify-center mb-8">
             <div className="flex gap-1 p-1 bg-gray-50 rounded-md border border-gray-200">
               {professions.map(profession => (
