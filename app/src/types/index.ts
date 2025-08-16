@@ -145,6 +145,7 @@ export interface SkillImageProps {
   width: number;
   height: number;
   className?: string;
+  showTooltip?: boolean;
 }
 
 export interface PlayerSkillsProps {
