@@ -141,7 +141,7 @@ export function HomeView() {
                       <div className="flex gap-1" role="list" aria-label="Team 1 professions">
                         {guild1Professions.filter(profId => profId != null).map((profId: number, idx: number) => (
                           <div key={idx} role="listitem">
-                            <ProfessionImage profId={profId} width={80} height={80} />
+                            <ProfessionImage profId={profId} width={20} height={20} />
                           </div>
                         ))}
                       </div>
@@ -154,7 +154,7 @@ export function HomeView() {
                       <div className="flex gap-1" role="list" aria-label="Team 2 professions">
                         {guild2Professions.filter(profId => profId != null).map((profId: number, idx: number) => (
                           <div key={idx} role="listitem">
-                            <ProfessionImage profId={profId} width={80} height={80} />
+                            <ProfessionImage profId={profId} width={20} height={20} />
                           </div>
                         ))}
                       </div>
