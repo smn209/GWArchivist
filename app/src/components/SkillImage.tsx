@@ -28,11 +28,15 @@ export const SkillImage = memo(function SkillImage({
       width={width}
       height={height}
       className={`${className} transition-transform duration-200 hover:scale-105 cursor-pointer`}
-      onError={handleError}
+      onError={(e) => {
+        e.preventDefault()
+        handleError()
+      }}
       style={imageStyle}
       priority={width <= 40}
       loading={width <= 40 ? "eager" : "lazy"}
       quality={75}
+      unoptimized={false}
     />
   )
 

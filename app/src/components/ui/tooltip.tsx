@@ -27,7 +27,7 @@ interface TooltipContentProps {
   sideOffset?: number
 }
 
-export function Tooltip({ children, delayDuration = 200 }: TooltipProps) {
+export function Tooltip({ children }: TooltipProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [position, setPosition] = useState({ x: 0, y: 0 })
 
@@ -84,7 +84,7 @@ export function TooltipTrigger({ children, asChild = false }: TooltipTriggerProp
       ref: triggerRef,
       onMouseEnter: handleMouseEnter,
       onMouseLeave: handleMouseLeave,
-    } as any)
+    } as React.HTMLAttributes<HTMLElement>)
   }
 
   return (

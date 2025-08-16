@@ -6,7 +6,6 @@ import {
   getSkillTypeName,
   PROFESSION_NAMES,
   ATTRIBUTE_NAMES,
-  type SkillDetail,
   type Profession,
   type Attribute
 } from '../lib/skills'
