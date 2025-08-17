@@ -1,6 +1,7 @@
 "use client"
-import { ProfessionImage } from "../components/ProfessionImage"
+
 import { Header } from "../components/Header"
+import { ProfessionLineup } from "../components/ProfessionLineup"
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "../components/ui/table"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
@@ -76,7 +77,7 @@ export function HomeView() {
                 
                 return (
                   <TableRow 
-                    key={match.match_id} 
+                    key={match.match_id}
                     role="button"
                     tabIndex={0}
                     className={`cursor-pointer hover:bg-gray-100 border-gray-200 min-h-[36px] focus:outline-none focus:ring-2 focus:ring-gray-400 focus:bg-gray-100 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
@@ -92,26 +93,22 @@ export function HomeView() {
                     <TableCell className="text-black text-[0.82rem] py-2">{new Date(match.match_date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</TableCell>
                     <TableCell className="text-black text-[0.82rem] py-2">{match.occasion}</TableCell>
                     <TableCell className="py-2">
-                      <div className="flex gap-1" role="list" aria-label="Team 1 professions">
-                        {guild1Professions.filter(profId => profId != null).map((profId: number, idx: number) => (
-                          <div key={idx} role="listitem">
-                            <ProfessionImage profId={profId} width={20} height={20} />
-                          </div>
-                        ))}
-                      </div>
+                      <ProfessionLineup 
+                        professions={guild1Professions} 
+                        matchDetail={detail}
+                        iconSize={20}
+                      />
                     </TableCell>
                     <TableCell className="text-black font-semibold text-[0.82rem] py-2">
                       {match.guild1_name} <span className="text-gray-600">[{match.guild1_tag}]</span> <span className="text-[0.7rem] text-gray-500">#{match.guild1_rank}</span>
                       {winner === 1 && <span className="ml-1" aria-label="Winner">🏆</span>}
                     </TableCell>
                     <TableCell className="py-2">
-                      <div className="flex gap-1" role="list" aria-label="Team 2 professions">
-                        {guild2Professions.filter(profId => profId != null).map((profId: number, idx: number) => (
-                          <div key={idx} role="listitem">
-                            <ProfessionImage profId={profId} width={20} height={20} />
-                          </div>
-                        ))}
-                      </div>
+                      <ProfessionLineup 
+                        professions={guild2Professions} 
+                        matchDetail={detail}
+                        iconSize={20}
+                      />
                     </TableCell>
                     <TableCell className="text-black font-semibold text-[0.82rem] py-2">
                       {match.guild2_name} <span className="text-gray-600">[{match.guild2_tag}]</span> <span className="text-[0.7rem] text-gray-500">#{match.guild2_rank}</span>

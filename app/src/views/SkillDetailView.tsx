@@ -241,8 +241,8 @@ export function SkillDetailView({ skillId }: SkillDetailViewProps) {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {matches.map(match => (
-                          match.players.map((player, idx) => (
+                        {matches.flatMap(match => {
+                          return match.players.map((player, idx) => (
                             <TableRow
                               key={`${match.match_id}-${player.player_number}-${idx}`}
                               className={`cursor-pointer hover:bg-gray-100 border-gray-200 transition-colors ${idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
@@ -280,7 +280,7 @@ export function SkillDetailView({ skillId }: SkillDetailViewProps) {
                               </TableCell>
                             </TableRow>
                           ))
-                        ))}
+                        })}
                       </TableBody>
                     </Table>
                   </div>

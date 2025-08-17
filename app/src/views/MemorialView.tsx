@@ -5,12 +5,13 @@ import { Calendar, Trophy, Filter } from "lucide-react"
 import Image from "next/image"
 import { Header } from "../components/Header"
 import { ProfessionImage } from "../components/ProfessionImage"
+import { ProfessionLineup } from "../components/ProfessionLineup"
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "../components/ui/table"
 import { Input } from "../components/ui/input"
 import { Button } from "../components/ui/button"
 import { Select, SelectOption } from "../components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogBody, DialogFooter } from "../components/ui/dialog"
-import { MemorialMatch, MemorialFilters, MemorialResponse, FilterOptions, PROFESSIONS } from "@/types"
+import { MemorialMatch, MemorialFilters, MemorialResponse, FilterOptions, PROFESSIONS, MatchDetail } from "@/types"
 
 function createEmptyFilters(): MemorialFilters {
   return {
@@ -21,6 +22,7 @@ function createEmptyFilters(): MemorialFilters {
 
 export default function MemorialView() {
   const [matches, setMatches] = useState<MemorialMatch[]>([])
+  const [matchDetails, setMatchDetails] = useState<Record<string, MatchDetail>>({})
   const [loading, setLoading] = useState(false)
   const [pagination, setPagination] = useState({ total: 0, limit: 50, offset: 0, hasMore: false })
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
@@ -58,6 +60,26 @@ export default function MemorialView() {
 
       if (resetOffset) {
         setFilters(filtersToUse)
+      }
+
+      if (data.matches.length > 0) {
+        const matchIdsString = data.matches.map(match => match.match_id).join(',')
+        fetch(`/api/matchs?match_ids=${matchIdsString}`)
+          .then(res => res.json())
+          .then(detailsArray => {
+            const detailsMap: Record<string, MatchDetail> = {}
+            detailsArray.forEach((detail: MatchDetail) => {
+              detailsMap[detail.match_info.match_id] = detail
+            })
+            if (resetOffset) {
+              setMatchDetails(detailsMap)
+            } else {
+              setMatchDetails(prev => ({ ...prev, ...detailsMap }))
+            }
+          })
+          .catch(error => {
+            console.error('Failed to fetch match details:', error)
+          })
       }
     } catch (error) {
       console.error('failed to search matches:', error)
@@ -246,6 +268,7 @@ export default function MemorialView() {
 
   const renderMatchRow = (match: MemorialMatch, index: number) => {
     const isWinner1 = match.winner_guild_id === match.guild1_id
+    const detail = matchDetails[match.match_id]
 
     return (
       <TableRow
@@ -272,11 +295,11 @@ export default function MemorialView() {
           <div className="text-xs text-gray-500">#{match.guild1_rank}</div>
         </TableCell>
         <TableCell className="px-2 py-1">
-          <div className="flex gap-0.5 flex-nowrap">
-            {match.guild1_professions.filter(p => p != null).map((profId, idx) => (
-              <ProfessionImage key={idx} profId={profId} width={16} height={16} className="flex-shrink-0" />
-            ))}
-          </div>
+          <ProfessionLineup 
+            professions={match.guild1_professions} 
+            matchDetail={detail}
+            iconSize={16}
+          />
         </TableCell>
         <TableCell className="text-black text-xs px-2 py-1">
           <div className="flex items-center gap-1">
@@ -287,11 +310,11 @@ export default function MemorialView() {
           <div className="text-xs text-gray-500">#{match.guild2_rank}</div>
         </TableCell>
         <TableCell className="px-2 py-1">
-          <div className="flex gap-0.5 flex-nowrap">
-            {match.guild2_professions.filter(p => p != null).map((profId, idx) => (
-              <ProfessionImage key={idx} profId={profId} width={16} height={16} className="flex-shrink-0" />
-            ))}
-          </div>
+          <ProfessionLineup 
+            professions={match.guild2_professions} 
+            matchDetail={detail}
+            iconSize={16}
+          />
         </TableCell>
         <TableCell className="text-black text-xs px-2 py-1">{match.flux}</TableCell>
       </TableRow>
