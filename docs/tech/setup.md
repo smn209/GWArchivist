@@ -16,7 +16,7 @@
 
 ### 1. Start ClickHouse Database
 
-Navigate to the `data` directory and start the ClickHouse container:
+Navigate to the `database` directory and start the ClickHouse container:
 
 ```bash
 cd data
@@ -35,16 +35,10 @@ docker exec -it gwgvg_clickhouse clickhouse-client -u dev -d gwarchivist
 
 ### 3. Create Database Schema
 
-Once connected to ClickHouse, create the tables by executing the schema file:
-
-```sql
-SOURCE database/schema.sql;
-```
-
-Alternatively, you can execute the schema directly:
+Once ClickHouse Docker created, create the tables by executing the schema file:
 
 ```bash
-docker exec -i gwgvg_clickhouse clickhouse-client -u dev -d gwarchivist < database/schema.sql
+docker exec -i gwgvg_clickhouse clickhouse-client -u dev -d gwarchivist < schema.sql
 ```
 
 For more information about the database schema, see [database-schema.md](database-schema.md).

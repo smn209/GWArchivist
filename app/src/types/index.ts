@@ -1,7 +1,27 @@
-import React from 'react';
+
 
 export interface QueryResult<T> {
   data: T[];
+}
+
+export interface SkillMatchPlayer extends Pick<Player, 'player_number' | 'guild_id' | 'encoded_name' | 'primary_profession' | 'secondary_profession' | 'used_skills'> {
+  guild_name: string
+  guild_tag: string
+  guild_rank: number
+}
+
+export interface SkillMatch extends Pick<MatchBase, 'match_id' | 'match_date' | 'map_name' | 'occasion' | 'flux'> {
+  players: SkillMatchPlayer[]
+}
+
+export interface SkillMatchesResponse {
+  matches: SkillMatch[]
+  pagination: {
+    total: number
+    limit: number
+    offset: number
+    hasMore: boolean
+  }
 }
 
 export interface Guild {
@@ -145,16 +165,14 @@ export interface SkillImageProps {
   width: number;
   height: number;
   className?: string;
+  showTooltip?: boolean;
+  clickable?: boolean;
 }
 
 export interface PlayerSkillsProps {
   skills: number[];
   className?: string;
-}
-
-export interface WallpaperProps {
-  children: React.ReactNode;
-  src?: string;
+  clickable?: boolean;
 }
 
 export interface PlayerDetailsProps {
@@ -168,6 +186,7 @@ export interface PlayerDetailsProps {
       skills: number[];
     };
   };
+  skillsClickable?: boolean;
 }
 
 export interface MemorialFilters {

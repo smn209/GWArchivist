@@ -3,14 +3,15 @@ import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Calendar, Trophy, Filter } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
+import { Header } from "../components/Header"
 import { ProfessionImage } from "../components/ProfessionImage"
+import { ProfessionLineup } from "../components/ProfessionLineup"
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "../components/ui/table"
 import { Input } from "../components/ui/input"
 import { Button } from "../components/ui/button"
 import { Select, SelectOption } from "../components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogBody, DialogFooter } from "../components/ui/dialog"
-import { MemorialMatch, MemorialFilters, MemorialResponse, FilterOptions, PROFESSIONS } from "@/types"
+import { MemorialMatch, MemorialFilters, MemorialResponse, FilterOptions, PROFESSIONS, MatchDetail } from "@/types"
 
 function createEmptyFilters(): MemorialFilters {
   return {
@@ -21,6 +22,7 @@ function createEmptyFilters(): MemorialFilters {
 
 export default function MemorialView() {
   const [matches, setMatches] = useState<MemorialMatch[]>([])
+  const [matchDetails, setMatchDetails] = useState<Record<string, MatchDetail>>({})
   const [loading, setLoading] = useState(false)
   const [pagination, setPagination] = useState({ total: 0, limit: 50, offset: 0, hasMore: false })
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
@@ -58,6 +60,26 @@ export default function MemorialView() {
 
       if (resetOffset) {
         setFilters(filtersToUse)
+      }
+
+      if (data.matches.length > 0) {
+        const matchIdsString = data.matches.map(match => match.match_id).join(',')
+        fetch(`/api/matchs?match_ids=${matchIdsString}`)
+          .then(res => res.json())
+          .then(detailsArray => {
+            const detailsMap: Record<string, MatchDetail> = {}
+            detailsArray.forEach((detail: MatchDetail) => {
+              detailsMap[detail.match_info.match_id] = detail
+            })
+            if (resetOffset) {
+              setMatchDetails(detailsMap)
+            } else {
+              setMatchDetails(prev => ({ ...prev, ...detailsMap }))
+            }
+          })
+          .catch(error => {
+            console.error('Failed to fetch match details:', error)
+          })
       }
     } catch (error) {
       console.error('failed to search matches:', error)
@@ -246,6 +268,7 @@ export default function MemorialView() {
 
   const renderMatchRow = (match: MemorialMatch, index: number) => {
     const isWinner1 = match.winner_guild_id === match.guild1_id
+    const detail = matchDetails[match.match_id]
 
     return (
       <TableRow
@@ -272,11 +295,11 @@ export default function MemorialView() {
           <div className="text-xs text-gray-500">#{match.guild1_rank}</div>
         </TableCell>
         <TableCell className="px-2 py-1">
-          <div className="flex gap-0.5 flex-nowrap">
-            {match.guild1_professions.filter(p => p != null).map((profId, idx) => (
-              <ProfessionImage key={idx} profId={profId} width={16} height={16} className="flex-shrink-0" />
-            ))}
-          </div>
+          <ProfessionLineup 
+            professions={match.guild1_professions} 
+            matchDetail={detail}
+            iconSize={16}
+          />
         </TableCell>
         <TableCell className="text-black text-xs px-2 py-1">
           <div className="flex items-center gap-1">
@@ -287,11 +310,11 @@ export default function MemorialView() {
           <div className="text-xs text-gray-500">#{match.guild2_rank}</div>
         </TableCell>
         <TableCell className="px-2 py-1">
-          <div className="flex gap-0.5 flex-nowrap">
-            {match.guild2_professions.filter(p => p != null).map((profId, idx) => (
-              <ProfessionImage key={idx} profId={profId} width={16} height={16} className="flex-shrink-0" />
-            ))}
-          </div>
+          <ProfessionLineup 
+            professions={match.guild2_professions} 
+            matchDetail={detail}
+            iconSize={16}
+          />
         </TableCell>
         <TableCell className="text-black text-xs px-2 py-1">{match.flux}</TableCell>
       </TableRow>
@@ -300,36 +323,7 @@ export default function MemorialView() {
 
   return (
     <div className="min-h-screen flex flex-col w-full bg-white">
-      <div className="relative w-full h-[15vh]">
-        <Image
-          src="/wallpapers/concepts/_4s7__concept_art.jpg"
-          alt="Guild Wars Concept Art"
-          fill
-          className="object-cover"
-        />
-      </div>
-
-      <div className="w-full flex items-center justify-between py-4 px-20 border-b border-gray-200">
-        <div className="flex-1">
-          <Link href="/" className="inline-block hover:opacity-80 transition-opacity" aria-label="Go to home page">
-            <Image
-              src="/icons/The_Frog.png"
-              alt="The Frog logo"
-              width={40}
-              height={40}
-              className="rounded"
-            />
-          </Link>
-        </div>
-        <div className="flex-1 flex justify-center">
-          <span className="text-black font-medium">Search in archive</span>
-        </div>
-        <div className="flex-1 flex justify-end">
-          <span className="px-4 py-2 rounded-md font-medium text-black">
-            Memorial
-          </span>
-        </div>
-      </div>
+      <Header showSearch={false} />
 
       <div className="text-center py-8">
         <h1 className="text-5xl font-bold mb-4 text-black">Memorial Archive</h1>

@@ -11,5 +11,3 @@ services:
     ports:
       - "8123:8123"
       - "9000:9000"
-    volumes:
-      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
