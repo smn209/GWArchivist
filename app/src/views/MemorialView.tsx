@@ -106,7 +106,6 @@ export default function MemorialView() {
 
       const [occasions, fluxes, maps, guilds] = await Promise.all(requests)
       
-      console.log('API responses:', { occasions, fluxes, maps, guilds }) // Debug log
       
       const uniqueOccasions = [...new Set(occasions || [])] as string[]
       const uniqueFluxes = [...new Set(fluxes || [])] as string[]

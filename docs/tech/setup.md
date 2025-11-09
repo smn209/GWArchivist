@@ -37,8 +37,14 @@ docker exec -it gwgvg_clickhouse clickhouse-client -u dev -d gwarchivist
 
 Once ClickHouse Docker created, create the tables by executing the schema file:
 
+**Bash/Linux/Mac:**
 ```bash
-docker exec -i gwgvg_clickhouse clickhouse-client -u dev -d gwarchivist < schema.sql
+docker exec -i gwgvg_clickhouse clickhouse-client -u dev -d gwarchivist < database/schema.sql
+```
+
+**PowerShell (Windows):**
+```powershell
+Get-Content database\schema.sql | docker exec -i gwgvg_clickhouse clickhouse-client -u dev -d gwarchivist --multiquery
 ```
 
 For more information about the database schema, see [database-schema.md](database-schema.md).

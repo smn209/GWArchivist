@@ -111,7 +111,6 @@ const buildWhereConditions = (filters: MemorialFilters): { conditions: string[],
     const countValue = filters[countKey] as number | undefined
     
     if (countValue && typeof countValue === 'number' && countValue > 0) {
-      console.log(`Adding profession filter for profession ${i} with count ${countValue}`)
       conditions.push(`
         m.match_id IN (
           SELECT mp.match_id 
